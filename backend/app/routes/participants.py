@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import datetime as dt
-
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -10,7 +9,13 @@ from app.core.security import get_current_user
 from app.models.admin_user import AdminUser
 from app.models.event import Event
 from app.models.participant import Participant, PaymentStatus
+from app.schemas.checkin import CheckinRequest
 from app.schemas.participant import ParticipantCreate, ParticipantResponse
+from app.services.checkin_service import (
+    CheckinError,
+    find_participant_by_ticket_code,
+    perform_checkin,
+)
 from app.services.email_service import send_registration_email
 
 router = APIRouter(prefix="/participants", tags=["participants"])
@@ -93,20 +98,25 @@ def confirm_payment(
     return participant
 
 
-@router.patch("/{participant_id}/checkin", response_model=ParticipantResponse)
-def checkin_participant(
-    participant_id: int,
+@router.patch("/checkin", response_model=None)
+def checkin_by_ticket(
+    payload: CheckinRequest,
     db: Session = Depends(get_db),
     current_admin: AdminUser = Depends(get_current_user),
-) -> Participant:
-    participant = _get_scoped_participant(participant_id, current_admin, db)
-    if participant.checkin_done:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Check-in ja realizado"
+) -> dict | JSONResponse:
+    try:
+        participant = find_participant_by_ticket_code(
+            payload.ticket_code, db, event_id=current_admin.event_id
         )
+        perform_checkin(participant, db)
+    except CheckinError as error:
+        content: dict = {"ok": False, "reason": error.reason}
+        if error.checkin_at is not None:
+            content["checkin_at"] = error.checkin_at.isoformat()
+        return JSONResponse(status_code=error.status_code, content=content)
 
-    participant.checkin_done = True
-    participant.checkin_at = dt.datetime.now(dt.timezone.utc)
-    db.commit()
-    db.refresh(participant)
-    return participant
+    return {
+        "ok": True,
+        "name": participant.name,
+        "checkin_at": participant.checkin_at.isoformat(),
+    }
