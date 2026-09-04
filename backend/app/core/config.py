@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     MP_ACCESS_TOKEN: str | None = None
     MP_PUBLIC_KEY: str | None = None
+    MP_WEBHOOK_SECRET: str | None = None
     RESEND_API_KEY: str | None = None
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480

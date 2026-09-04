@@ -11,3 +11,4 @@ passlib[bcrypt]>=1.7
 # passlib 1.7.4 breaks on bcrypt>=4.1 (removed bcrypt.__about__), pin below that
 bcrypt<4.1
 python-jose[cryptography]>=3.3
+mercadopago>=2.2
