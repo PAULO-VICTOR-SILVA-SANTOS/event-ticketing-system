@@ -177,6 +177,7 @@ async def payment_webhook(request: Request, db: Session = Depends(get_db)) -> di
         event = db.get(Event, participant.event_id)
         if event is not None:
             send_ticket_email(participant, event)
+            db.commit()
 
     return {"status": "processed"}
 

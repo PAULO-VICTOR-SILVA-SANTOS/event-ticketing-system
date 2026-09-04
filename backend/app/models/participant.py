@@ -45,6 +45,7 @@ class Participant(Base):
         nullable=False,
     )
     mp_payment_id: Mapped[str | None] = mapped_column(String(100))
+    ticket_code: Mapped[str | None] = mapped_column(String(36), unique=True)
     checkin_done: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     checkin_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[dt.datetime] = mapped_column(

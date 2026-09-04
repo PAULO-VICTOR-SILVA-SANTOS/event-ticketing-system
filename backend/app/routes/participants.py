@@ -11,6 +11,7 @@ from app.models.admin_user import AdminUser
 from app.models.event import Event
 from app.models.participant import Participant, PaymentStatus
 from app.schemas.participant import ParticipantCreate, ParticipantResponse
+from app.services.email_service import send_registration_email
 
 router = APIRouter(prefix="/participants", tags=["participants"])
 
@@ -54,6 +55,15 @@ def create_participant(
     db.add(participant)
     db.commit()
     db.refresh(participant)
+
+    send_registration_email(
+        participant_name=participant.name,
+        participant_email=participant.email,
+        event_name=event.name,
+        event_date=event.date,
+        event_location=event.location,
+    )
+
     return participant
 
 
