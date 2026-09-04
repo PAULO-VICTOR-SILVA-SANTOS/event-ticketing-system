@@ -7,19 +7,35 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.admin_user import AdminUser
 from app.models.event import Event
+from app.models.participant import Participant, PaymentStatus
 from app.schemas.event import EventResponse, EventUpdate
 
 router = APIRouter(prefix="/events", tags=["events"])
 
 
 @router.get("/{event_id}", response_model=EventResponse)
-def get_event(event_id: int, db: Session = Depends(get_db)) -> Event:
+def get_event(event_id: int, db: Session = Depends(get_db)) -> EventResponse:
     event = db.get(Event, event_id)
     if event is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Evento nao encontrado"
         )
-    return event
+
+    registered_count = (
+        db.query(Participant)
+        .filter(
+            Participant.event_id == event_id,
+            Participant.payment_status != PaymentStatus.EXPIRED,
+        )
+        .count()
+    )
+
+    return EventResponse.model_validate(event).model_copy(
+        update={
+            "registered_count": registered_count,
+            "remaining_slots": max(event.max_capacity - registered_count, 0),
+        }
+    )
 
 
 @router.put("/{event_id}", response_model=EventResponse)

@@ -38,3 +38,5 @@ class EventResponse(EventBase):
     id: int
     is_active: bool
     created_at: dt.datetime
+    registered_count: int = 0
+    remaining_slots: int = 0

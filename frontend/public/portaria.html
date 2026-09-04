@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Portaria</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
+  />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div id="gate-screen" class="gate-screen">
+    <div class="gate-screen__icon"><i class="ti ti-shield-lock"></i></div>
+    <h1>Acesso da portaria</h1>
+    <p>Digite a chave de acesso fornecida pelo organizador para liberar o leitor de QR Code.</p>
+
+    <form id="gate-form" class="gate-form">
+      <div class="field" style="margin-bottom:0;text-align:left;">
+        <label for="gate-key">Chave da portaria</label>
+        <input type="text" id="gate-key" placeholder="Chave secreta" autocomplete="off" required />
+      </div>
+      <div id="gate-error" class="alert alert-danger hidden" style="margin-top:12px;margin-bottom:0;">
+        <i class="ti ti-alert-triangle"></i>
+        <span id="gate-error-text">Chave invalida.</span>
+      </div>
+      <button type="submit" id="gate-submit" class="btn btn-primary" style="margin-top:14px;">
+        <i class="ti ti-lock-open"></i> Entrar
+      </button>
+    </form>
+  </div>
+
+  <div id="scanner-app" class="scanner-app hidden">
+    <header class="scanner-header">
+      <div class="scanner-header__title"><i class="ti ti-scan"></i> Portaria</div>
+      <button id="logout-btn" class="icon-btn" title="Sair"><i class="ti ti-logout"></i></button>
+    </header>
+
+    <div class="scanner-viewport">
+      <video id="scanner-video" autoplay playsinline muted></video>
+      <div class="scan-frame"></div>
+      <div class="scanner-hint" id="scanner-hint">Aponte a camera para o QR Code do ingresso</div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stats-bar__count" id="stats-count">0 <span>/ 0 entraram</span></div>
+      <div class="stats-bar__bar"><div class="stats-bar__fill" id="stats-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div id="result-overlay" class="result-overlay hidden">
+    <div class="result-overlay__icon" id="result-icon"><i class="ti ti-circle-check"></i></div>
+    <div class="result-overlay__name" id="result-name"></div>
+    <div class="result-overlay__reason" id="result-reason"></div>
+  </div>
+
+  <canvas id="scanner-canvas" class="hidden"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/portaria.js"></script>
+</body>
+</html>

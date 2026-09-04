@@ -51,13 +51,20 @@ def create_pix(payload: PixPaymentRequest, db: Session = Depends(get_db)) -> Pix
     participant = _get_participant_for_event(payload.participant_id, payload.event_id, db)
     event = _get_event(payload.event_id, db)
 
-    result = payment_service.create_pix_payment(
-        participant_id=participant.id,
-        amount=event.ticket_price,
-        participant_name=participant.name,
-        participant_email=participant.email,
-        event_name=event.name,
-    )
+    try:
+        result = payment_service.create_pix_payment(
+            participant_id=participant.id,
+            amount=event.ticket_price,
+            participant_name=participant.name,
+            participant_email=participant.email,
+            event_name=event.name,
+        )
+    except RuntimeError as error:
+        logger.exception("Falha ao criar pagamento PIX no Mercado Pago")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Nao foi possivel gerar o pagamento Pix no momento",
+        ) from error
 
     participant.mp_payment_id = str(result["payment_id"])
     db.commit()
@@ -78,14 +85,21 @@ def create_card(
     participant = _get_participant_for_event(payload.participant_id, payload.event_id, db)
     event = _get_event(payload.event_id, db)
 
-    result = payment_service.create_card_payment(
-        participant_id=participant.id,
-        amount=event.ticket_price,
-        token=payload.token,
-        installments=payload.installments,
-        participant_email=participant.email,
-        event_name=event.name,
-    )
+    try:
+        result = payment_service.create_card_payment(
+            participant_id=participant.id,
+            amount=event.ticket_price,
+            token=payload.token,
+            installments=payload.installments,
+            participant_email=participant.email,
+            event_name=event.name,
+        )
+    except RuntimeError as error:
+        logger.exception("Falha ao processar pagamento com cartao no Mercado Pago")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Nao foi possivel processar o pagamento com cartao",
+        ) from error
 
     participant.mp_payment_id = str(result["payment_id"])
     if result["status"] == "approved":
@@ -184,5 +198,12 @@ async def payment_webhook(request: Request, db: Session = Depends(get_db)) -> di
 
 @router.get("/status/{payment_id}", response_model=PaymentStatusResponse)
 def get_payment_status(payment_id: str) -> PaymentStatusResponse:
-    result = payment_service.get_payment_status(payment_id)
+    try:
+        result = payment_service.get_payment_status(payment_id)
+    except RuntimeError as error:
+        logger.exception("Falha ao consultar pagamento %s", payment_id)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Nao foi possivel consultar o status do pagamento",
+        ) from error
     return PaymentStatusResponse(payment_id=str(result["payment_id"]), status=result["status"])

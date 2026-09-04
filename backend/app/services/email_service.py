@@ -32,7 +32,10 @@ def _send_email(to: str, subject: str, html: str) -> None:
     if not _resend_ready():
         return
 
-    resend.Emails.send({"from": FROM_EMAIL, "to": to, "subject": subject, "html": html})
+    try:
+        resend.Emails.send({"from": FROM_EMAIL, "to": to, "subject": subject, "html": html})
+    except Exception:
+        logger.exception("Falha ao enviar e-mail via Resend para %s", to)
 
 
 def send_registration_email(

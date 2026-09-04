@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, checkin, dashboard, events, expenses, participants, payments
+from app.routes import (
+    auth,
+    checkin,
+    dashboard,
+    events,
+    expenses,
+    participants,
+    payments,
+    public_config,
+)
 
 app = FastAPI(
     title="Event Ticketing System",
@@ -26,6 +35,7 @@ app.include_router(expenses.router, prefix=API_V1_PREFIX)
 app.include_router(dashboard.router, prefix=API_V1_PREFIX)
 app.include_router(payments.router, prefix=API_V1_PREFIX)
 app.include_router(checkin.router, prefix=API_V1_PREFIX)
+app.include_router(public_config.router, prefix=API_V1_PREFIX)
 
 
 @app.get("/health", tags=["health"])

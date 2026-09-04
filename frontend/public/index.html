@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Ingressos</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
+  />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <div class="brand-row"><i class="ti ti-ticket"></i> Ingressos</div>
+
+    <section id="event-hero" class="event-hero">
+      <div class="event-hero__banner is-placeholder skeleton" style="aspect-ratio:16/9;"></div>
+      <div class="event-hero__body">
+        <div class="skeleton" style="height:28px;width:70%;border-radius:8px;"></div>
+        <div class="skeleton" style="height:14px;width:100%;border-radius:6px;"></div>
+        <div class="skeleton" style="height:14px;width:40%;border-radius:6px;"></div>
+      </div>
+    </section>
+
+    <div id="event-error" class="alert alert-danger hidden">
+      <i class="ti ti-alert-triangle"></i>
+      <span id="event-error-text">Nao foi possivel carregar este evento.</span>
+    </div>
+
+    <section id="registration-card" class="card hidden">
+      <h2 class="card__title">Garanta seu ingresso</h2>
+      <p class="card__subtitle">Preencha seus dados para continuar com a inscricao.</p>
+
+      <div id="form-alert" class="alert alert-danger hidden">
+        <i class="ti ti-alert-triangle"></i>
+        <span id="form-alert-text"></span>
+      </div>
+
+      <form id="registration-form">
+        <div class="field">
+          <label for="field-name">Nome completo</label>
+          <input type="text" id="field-name" name="name" placeholder="Seu nome completo" required />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="field-nickname">Apelido</label>
+            <input type="text" id="field-nickname" name="nickname" placeholder="Opcional" />
+          </div>
+          <div class="field">
+            <label for="field-cpf">CPF</label>
+            <input type="text" id="field-cpf" name="cpf" placeholder="Opcional" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="field-email">E-mail</label>
+          <input type="email" id="field-email" name="email" placeholder="voce@email.com" required />
+        </div>
+
+        <div class="field">
+          <label for="field-whatsapp">WhatsApp</label>
+          <input
+            type="tel"
+            id="field-whatsapp"
+            name="whatsapp"
+            placeholder="(11) 99999-9999"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label>Forma de pagamento</label>
+          <div class="pay-toggle">
+            <input type="radio" id="pay-pix" name="payment_method" value="pix" checked />
+            <label for="pay-pix"><i class="ti ti-qrcode"></i> Pix</label>
+
+            <input type="radio" id="pay-card" name="payment_method" value="card" />
+            <label for="pay-card"><i class="ti ti-credit-card"></i> Cartao</label>
+          </div>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn btn-primary">
+          <i class="ti ti-arrow-right"></i>
+          Continuar
+        </button>
+      </form>
+    </section>
+
+    <div id="sold-out" class="alert alert-warning hidden">
+      <i class="ti ti-ticket-off"></i>
+      Este evento esta com todas as vagas preenchidas.
+    </div>
+
+    <section id="payment-card" class="card hidden">
+      <div id="pix-panel" class="hidden">
+        <h2 class="card__title">Pague com Pix</h2>
+        <p class="card__subtitle">Escaneie o QR Code ou copie o codigo abaixo.</p>
+
+        <div class="pix-result">
+          <img id="pix-qr-image" alt="QR Code Pix" />
+          <div class="pix-copy">
+            <input type="text" id="pix-copy-code" readonly />
+            <button type="button" class="btn btn-secondary" id="pix-copy-btn" style="width:auto;">
+              <i class="ti ti-copy"></i>
+            </button>
+          </div>
+          <span id="pix-status" class="status-pill pending">
+            <span class="spinner"></span> Aguardando pagamento
+          </span>
+        </div>
+      </div>
+
+      <div id="card-panel" class="hidden">
+        <h2 class="card__title">Pague com cartao</h2>
+        <p class="card__subtitle">Seus dados sao criptografados pelo Mercado Pago.</p>
+        <div id="cardPaymentBrick_container"></div>
+        <div id="card-status" class="hidden"></div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      <i class="ti ti-lock" style="vertical-align:-2px;"></i>
+      Pagamentos processados com seguranca via Mercado Pago.
+    </p>
+  </div>
+
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/public.js"></script>
+</body>
+</html>
