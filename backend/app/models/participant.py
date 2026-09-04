@@ -33,7 +33,7 @@ class Participant(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     nickname: Mapped[str | None] = mapped_column(String(100))
-    cpf: Mapped[str] = mapped_column(String(14), nullable=False)
+    cpf: Mapped[str | None] = mapped_column(String(14))
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     whatsapp: Mapped[str] = mapped_column(String(20), nullable=False)
     payment_method: Mapped[PaymentMethod] = mapped_column(

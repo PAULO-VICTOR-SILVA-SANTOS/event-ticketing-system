@@ -6,3 +6,8 @@ python-dotenv>=1.0
 alembic>=1.14
 pydantic>=2.10
 pydantic-settings>=2.7
+email-validator>=2.2
+passlib[bcrypt]>=1.7
+# passlib 1.7.4 breaks on bcrypt>=4.1 (removed bcrypt.__about__), pin below that
+bcrypt<4.1
+python-jose[cryptography]>=3.3

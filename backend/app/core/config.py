@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     MP_ACCESS_TOKEN: str | None = None
     MP_PUBLIC_KEY: str | None = None
     RESEND_API_KEY: str | None = None
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
