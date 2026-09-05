@@ -19,11 +19,18 @@ function renderSidebar(activePage) {
   root.innerHTML = `
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="logo-mark"><i class="ti ti-ticket"></i></div>
-        <div class="logo-text">
-          PV Technology
-          <small>PAINEL DO EVENTO</small>
+        <div class="brand-info">
+          <div class="logo-mark-wrap">
+            <svg class="logo-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" stroke="url(#pvRingA)" stroke-width="1.4" stroke-dasharray="6 7"/><circle class="orbit-dot" cx="50" cy="2" r="3" fill="#a855f7"/><defs><linearGradient id="pvRingA" x1="0" y1="0" x2="100" y2="100"><stop offset="0%" stop-color="#0055ff" stop-opacity=".55"/><stop offset="100%" stop-color="#7b2fff" stop-opacity=".55"/></linearGradient></defs></svg>
+            <svg class="logo-ring-2" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" stroke="url(#pvRingB)" stroke-width="1.2" stroke-dasharray="3 8"/><defs><linearGradient id="pvRingB" x1="0" y1="0" x2="100" y2="100"><stop offset="0%" stop-color="#7b2fff" stop-opacity=".45"/><stop offset="100%" stop-color="#0055ff" stop-opacity=".45"/></linearGradient></defs></svg>
+            <div class="logo-mark"><span>PV</span></div>
+          </div>
+          <div class="logo-text">
+            PV Technology
+            <small>PAINEL DO EVENTO</small>
+          </div>
         </div>
+        <button class="theme-toggle-btn" id="theme-toggle-btn" data-theme-toggle type="button"></button>
       </div>
       <nav class="sidebar-nav">${links}</nav>
       <div class="sidebar-footer">
@@ -32,6 +39,7 @@ function renderSidebar(activePage) {
     </aside>`;
 
   document.getElementById("logout-btn").addEventListener("click", () => Auth.logout());
+  Theme.init();
 }
 
 function showToast(message, type = "info") {

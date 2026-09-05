@@ -1,4 +1,6 @@
 (function () {
+  Theme.init();
+
   const existingClaims = Auth.getClaims();
   if (existingClaims && !Auth.isExpired(existingClaims)) {
     window.location.href = "dashboard.html";
