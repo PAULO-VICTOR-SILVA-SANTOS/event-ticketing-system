@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Participantes - PV Technology</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
+  />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-root"></div>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow"><i class="ti ti-users"></i> Participantes</div>
+          <h1>Lista de inscritos</h1>
+          <p id="participants-subtitle">Carregando...</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline" id="export-btn"><i class="ti ti-download"></i> Exportar</button>
+          <button class="btn btn-primary" id="add-btn"><i class="ti ti-user-plus"></i> Adicionar participante</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="ti ti-search"></i>
+            <input type="text" id="search-input" placeholder="Buscar por nome ou e-mail..." />
+          </div>
+          <div class="filter-pills">
+            <button class="filter-pill active" data-filter="all">Todas</button>
+            <button class="filter-pill" data-filter="paid">Pagas</button>
+            <button class="filter-pill" data-filter="pending">Pendentes</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Contato</th>
+                <th>Pagamento</th>
+                <th>Status</th>
+                <th>Check-in</th>
+                <th>Acoes</th>
+              </tr>
+            </thead>
+            <tbody id="participants-tbody">
+              <tr class="loading-row"><td colspan="6">Carregando participantes...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="add-modal" hidden>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Adicionar participante</h3>
+        <button class="modal-close" id="add-modal-close"><i class="ti ti-x"></i></button>
+      </div>
+      <form id="add-form">
+        <div class="field">
+          <label for="p-name">Nome completo</label>
+          <input type="text" id="p-name" required />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="p-nickname">Apelido</label>
+            <input type="text" id="p-nickname" />
+          </div>
+          <div class="field">
+            <label for="p-cpf">CPF</label>
+            <input type="text" id="p-cpf" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="p-email">E-mail</label>
+          <input type="email" id="p-email" required />
+        </div>
+        <div class="field">
+          <label for="p-whatsapp">WhatsApp</label>
+          <input type="text" id="p-whatsapp" placeholder="(11) 99999-9999" required />
+        </div>
+        <div class="field">
+          <label for="p-method">Forma de pagamento</label>
+          <select id="p-method">
+            <option value="pix">Pix</option>
+            <option value="card">Cartao</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="add-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="add-submit-btn">
+            <i class="ti ti-check"></i> Adicionar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/participants.js"></script>
+</body>
+</html>

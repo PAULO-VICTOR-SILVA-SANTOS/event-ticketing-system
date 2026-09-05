@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Despesas - PV Technology</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
+  />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+  <style>
+    .expense-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .expense-row:last-child {
+      border-bottom: none;
+    }
+    .expense-info {
+      display: flex;
+      align-items: center;
+    }
+    .expense-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      margin-right: 18px;
+    }
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1100px) {
+      .totals-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .totals-grid .item .label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .totals-grid .item .value {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="sidebar-root"></div>
+
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <div class="eyebrow"><i class="ti ti-receipt-2"></i> Despesas</div>
+          <h1>Despesas do evento</h1>
+          <p id="expenses-subtitle">Carregando...</p>
+        </div>
+        <button class="btn btn-primary" id="add-expense-btn"><i class="ti ti-plus"></i> Nova despesa</button>
+      </div>
+
+      <section class="card totals-grid" id="totals-card">
+        <div class="item">
+          <div class="label">Total de despesas</div>
+          <div class="value" id="total-expenses">-</div>
+        </div>
+        <div class="item">
+          <div class="label">Arrecadado</div>
+          <div class="value" id="total-collected">-</div>
+        </div>
+        <div class="item">
+          <div class="label">Falta arrecadar</div>
+          <div class="value" id="total-remaining">-</div>
+        </div>
+        <div class="item">
+          <div class="label">Valor por pessoa</div>
+          <div class="value" id="total-per-person">-</div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px;">
+        <h3 style="margin-bottom: 4px;">Lista de despesas</h3>
+        <div id="expenses-list">
+          <div class="empty-state"><i class="ti ti-loader-2"></i>Carregando despesas...</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="expense-modal" hidden>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="expense-modal-title">Nova despesa</h3>
+        <button class="modal-close" id="expense-modal-close"><i class="ti ti-x"></i></button>
+      </div>
+      <form id="expense-form">
+        <input type="hidden" id="expense-id" />
+        <div class="field">
+          <label for="expense-name">Nome</label>
+          <input type="text" id="expense-name" required />
+        </div>
+        <div class="field">
+          <label for="expense-category">Categoria</label>
+          <select id="expense-category">
+            <option value="banda">Banda</option>
+            <option value="comida">Comida</option>
+            <option value="lembranca">Lembranca</option>
+            <option value="local">Local</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="expense-value">Valor (R$)</label>
+          <input type="number" id="expense-value" min="0" step="0.01" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="expense-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="expense-submit-btn">
+            <i class="ti ti-check"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/expenses.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - PV Technology</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter+Tight:wght@400;500;600;700;800&display=swap"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
+  />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+</head>
+<body>
+  <div class="login-shell">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-mark"><i class="ti ti-ticket"></i></div>
+        <div>
+          <h1>PV Technology</h1>
+          <p>Painel administrativo do evento</p>
+        </div>
+      </div>
+
+      <div class="form-error" id="login-error" hidden>
+        <i class="ti ti-alert-triangle"></i>
+        <span id="login-error-text">Usuario ou senha invalidos.</span>
+      </div>
+
+      <form id="login-form">
+        <div class="field">
+          <label for="username">Usuario</label>
+          <input type="text" id="username" name="username" placeholder="Seu usuario" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="password">Senha</label>
+          <input type="password" id="password" name="password" placeholder="Sua senha" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="login-submit">
+          <i class="ti ti-login-2"></i> Entrar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/login.js"></script>
+</body>
+</html>

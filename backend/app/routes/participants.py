@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -88,11 +88,12 @@ def list_participants(
 @router.patch("/{participant_id}/payment", response_model=ParticipantResponse)
 def confirm_payment(
     participant_id: int,
+    status_value: PaymentStatus = Query(PaymentStatus.PAID, alias="status"),
     db: Session = Depends(get_db),
     current_admin: AdminUser = Depends(get_current_user),
 ) -> Participant:
     participant = _get_scoped_participant(participant_id, current_admin, db)
-    participant.payment_status = PaymentStatus.PAID
+    participant.payment_status = status_value
     db.commit()
     db.refresh(participant)
     return participant

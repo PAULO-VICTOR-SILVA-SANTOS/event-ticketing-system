@@ -12,6 +12,7 @@ class EventBase(BaseModel):
     date: dt.date
     time: dt.time
     location: str
+    banner_url: str | None = None
     max_capacity: int
     ticket_price: Decimal
     pix_key: str | None = None
@@ -27,6 +28,7 @@ class EventUpdate(BaseModel):
     date: dt.date | None = None
     time: dt.time | None = None
     location: str | None = None
+    banner_url: str | None = None
     max_capacity: int | None = None
     ticket_price: Decimal | None = None
     pix_key: str | None = None
