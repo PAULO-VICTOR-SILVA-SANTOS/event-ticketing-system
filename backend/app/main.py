@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
 from app.routes import (
     auth,
     checkin,
@@ -18,9 +19,23 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Local dev frontends (public ticketing page + admin panel served via
+# `python -m http.server`) plus any exact custom domain set via
+# EXTRA_CORS_ORIGIN. Any *.railway.app deploy preview/domain is matched
+# separately below via allow_origin_regex.
+CORS_ORIGINS = [
+    "http://localhost:5500",
+    "http://localhost:5501",
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:5501",
+]
+if settings.EXTRA_CORS_ORIGIN:
+    CORS_ORIGINS.append(settings.EXTRA_CORS_ORIGIN)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=r"https://.*\.railway\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
