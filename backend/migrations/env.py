@@ -16,7 +16,12 @@ config = context.config
 
 # Override the sqlalchemy.url from alembic.ini with the value from .env,
 # so the real connection string never has to be hardcoded/committed.
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# "%" must be escaped as "%%" since Alembic's Config stores this via
+# ConfigParser, which treats "%" as interpolation syntax otherwise
+# (breaks on percent-encoded characters in the URL, e.g. in passwords).
+config.set_main_option(
+    "sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%")
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
