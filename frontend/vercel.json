@@ -1,12 +1,12 @@
 {
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/public/index.html" },
-    { "source": "/portaria", "destination": "/public/portaria.html" },
     { "source": "/admin", "destination": "/admin/login.html" },
     { "source": "/admin/login", "destination": "/admin/login.html" },
     { "source": "/admin/dashboard", "destination": "/admin/dashboard.html" },
     { "source": "/admin/participants", "destination": "/admin/participants.html" },
     { "source": "/admin/expenses", "destination": "/admin/expenses.html" },
-    { "source": "/admin/settings", "destination": "/admin/settings.html" }
+    { "source": "/admin/settings", "destination": "/admin/settings.html" },
+    { "source": "/portaria", "destination": "/public/portaria.html" }
   ]
 }
