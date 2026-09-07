@@ -16,8 +16,6 @@ from app.models.participant import Participant
 
 logger = logging.getLogger(__name__)
 
-FROM_EMAIL = "Ingressos <ingressos@resend.dev>"
-
 
 def _resend_ready() -> bool:
     if not settings.RESEND_API_KEY:
@@ -33,7 +31,9 @@ def _send_email(to: str, subject: str, html: str) -> None:
         return
 
     try:
-        resend.Emails.send({"from": FROM_EMAIL, "to": to, "subject": subject, "html": html})
+        resend.Emails.send(
+            {"from": settings.RESEND_FROM_EMAIL, "to": to, "subject": subject, "html": html}
+        )
     except Exception:
         logger.exception("Falha ao enviar e-mail via Resend para %s", to)
 
