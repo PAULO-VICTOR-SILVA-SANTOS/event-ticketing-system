@@ -8,6 +8,5 @@
     { "source": "/admin/participants", "destination": "/admin/participants.html" },
     { "source": "/admin/expenses", "destination": "/admin/expenses.html" },
     { "source": "/admin/settings", "destination": "/admin/settings.html" }
-  ],
-  "outputDirectory": "."
+  ]
 }
