@@ -16,16 +16,81 @@
   const listEl = document.getElementById("expenses-list");
   const subtitle = document.getElementById("expenses-subtitle");
 
+  // Mercado Pago fee rates. The data model only tracks payment_method as
+  // "pix" or "card" (no debit/credit distinction), so every card payment is
+  // treated as credit 1x -- the debit rate has no way to be applied.
+  const MP_FEE_RATES = { pix: 0.0099, card: 0.0498 };
+
+  function calculateMpFees(participants, ticketPrice) {
+    const paid = participants.filter((p) => p.payment_status === "paid");
+
+    let grossPix = 0;
+    let grossCard = 0;
+    paid.forEach((p) => {
+      if (p.payment_method === "pix") grossPix += ticketPrice;
+      else if (p.payment_method === "card") grossCard += ticketPrice;
+    });
+
+    const feePix = grossPix * MP_FEE_RATES.pix;
+    const feeCard = grossCard * MP_FEE_RATES.card;
+    const gross = grossPix + grossCard;
+    const totalFees = feePix + feeCard;
+    const net = gross - totalFees;
+
+    return { paidCount: paid.length, gross, feePix, feeCard, totalFees, net };
+  }
+
+  function renderMpFees(fees) {
+    document.getElementById("mp-gross").textContent = formatCurrency(fees.gross);
+    document.getElementById("mp-fees-total").textContent = formatCurrency(fees.totalFees);
+    document.getElementById("mp-net").textContent = formatCurrency(fees.net);
+
+    document.getElementById("mp-fees-breakdown").innerHTML = `
+      <div class="expense-row">
+        <div class="expense-info">
+          <div>
+            <div class="cell-name">Taxas Mercado Pago - Pix</div>
+            <div class="cell-sub">Absorvida pela organizadora</div>
+          </div>
+        </div>
+        <span class="expense-value">${formatCurrency(fees.feePix)}</span>
+      </div>
+      <div class="expense-row">
+        <div class="expense-info">
+          <div>
+            <div class="cell-name">Taxas Mercado Pago - Cartao</div>
+            <div class="cell-sub">Cobrada dos participantes</div>
+          </div>
+        </div>
+        <span class="expense-value">${formatCurrency(fees.feeCard)}</span>
+      </div>`;
+  }
+
   async function load() {
     try {
-      const [expensesData, dashboard] = await Promise.all([Api.listExpenses(), Api.getDashboard()]);
+      const [expensesData, dashboard, participants] = await Promise.all([
+        Api.listExpenses(),
+        Api.getDashboard(),
+        Api.listParticipants(),
+      ]);
       expenses = expensesData;
       subtitle.textContent = `${expenses.length} despesa(s) cadastrada(s)`;
 
-      document.getElementById("total-expenses").textContent = formatCurrency(dashboard.total_expenses);
+      // dashboard.value_per_person is the raw event ticket_price (see
+      // backend/app/routes/dashboard.py) -- reused here instead of an extra
+      // event fetch.
+      const ticketPrice = parseFloat(dashboard.value_per_person) || 0;
+      const fees = calculateMpFees(participants, ticketPrice);
+      renderMpFees(fees);
+
+      const totalExpensesWithFees = parseFloat(dashboard.total_expenses) + fees.totalFees;
+      const remainingWithFees = Math.max(totalExpensesWithFees - parseFloat(dashboard.total_collected), 0);
+      const netPerPerson = fees.paidCount > 0 ? fees.net / fees.paidCount : ticketPrice;
+
+      document.getElementById("total-expenses").textContent = formatCurrency(totalExpensesWithFees);
       document.getElementById("total-collected").textContent = formatCurrency(dashboard.total_collected);
-      document.getElementById("total-remaining").textContent = formatCurrency(dashboard.remaining_to_collect);
-      document.getElementById("total-per-person").textContent = formatCurrency(dashboard.value_per_person);
+      document.getElementById("total-remaining").textContent = formatCurrency(remainingWithFees);
+      document.getElementById("total-per-person").textContent = formatCurrency(netPerPerson);
 
       render();
     } catch (err) {
