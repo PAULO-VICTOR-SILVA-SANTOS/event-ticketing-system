@@ -33,6 +33,7 @@
       document.getElementById("s-capacity").value = event.max_capacity || "";
       document.getElementById("s-price").value = event.ticket_price || "";
       document.getElementById("s-pix-key").value = event.pix_key || "";
+      document.getElementById("s-show-remaining-slots").checked = event.show_remaining_slots !== false;
       updateBannerPreview(event.banner_url);
     } catch (err) {
       showToast(errorMessage(err), "error");
@@ -81,6 +82,7 @@
       max_capacity: parseInt(document.getElementById("s-capacity").value, 10),
       ticket_price: document.getElementById("s-price").value,
       pix_key: document.getElementById("s-pix-key").value.trim() || null,
+      show_remaining_slots: document.getElementById("s-show-remaining-slots").checked,
     };
 
     try {

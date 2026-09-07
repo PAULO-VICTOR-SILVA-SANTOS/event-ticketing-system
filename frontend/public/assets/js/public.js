@@ -43,6 +43,20 @@
         : 0;
     const isCritical = event.remaining_slots <= Math.max(event.max_capacity * 0.1, 3);
 
+    const slotsHtml = event.show_remaining_slots
+      ? `
+        <div class="slots">
+          <div class="slots__label">
+            <span>Vagas preenchidas</span>
+            <strong>${event.remaining_slots} restante${event.remaining_slots === 1 ? "" : "s"}</strong>
+          </div>
+          <div class="slots__bar">
+            <div class="slots__fill ${isCritical ? "is-critical" : ""}" style="width:${occupancyRatio * 100}%"></div>
+          </div>
+        </div>
+      `
+      : "";
+
     hero.innerHTML = `
       ${bannerHtml}
       <div class="event-hero__body">
@@ -57,15 +71,7 @@
           <span class="price-row__label">Valor do ingresso</span>
           <span class="price-row__value">${currencyFmt.format(event.ticket_price)}</span>
         </div>
-        <div class="slots">
-          <div class="slots__label">
-            <span>Vagas preenchidas</span>
-            <strong>${event.remaining_slots} restante${event.remaining_slots === 1 ? "" : "s"}</strong>
-          </div>
-          <div class="slots__bar">
-            <div class="slots__fill ${isCritical ? "is-critical" : ""}" style="width:${occupancyRatio * 100}%"></div>
-          </div>
-        </div>
+        ${slotsHtml}
       </div>
     `;
 

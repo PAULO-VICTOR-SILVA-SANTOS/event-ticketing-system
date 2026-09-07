@@ -16,6 +16,7 @@ class EventBase(BaseModel):
     max_capacity: int
     ticket_price: Decimal
     pix_key: str | None = None
+    show_remaining_slots: bool = True
 
 
 class EventCreate(EventBase):
@@ -32,6 +33,7 @@ class EventUpdate(BaseModel):
     max_capacity: int | None = None
     ticket_price: Decimal | None = None
     pix_key: str | None = None
+    show_remaining_slots: bool | None = None
 
 
 class EventResponse(EventBase):

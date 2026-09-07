@@ -29,6 +29,9 @@ class Event(Base):
     ticket_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     pix_key: Mapped[str | None] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    show_remaining_slots: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true", nullable=False
+    )
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
