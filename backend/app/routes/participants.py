@@ -157,9 +157,16 @@ def checkin_by_ticket(
     current_admin: AdminUser = Depends(get_current_user),
 ) -> dict | JSONResponse:
     try:
-        participant = find_participant_by_ticket_code(
-            payload.ticket_code, db, event_id=current_admin.event_id
-        )
+        if payload.participant_id is not None:
+            participant = db.get(Participant, payload.participant_id)
+            if participant is None or participant.event_id != current_admin.event_id:
+                raise CheckinError(404, "not_found")
+        elif payload.ticket_code:
+            participant = find_participant_by_ticket_code(
+                payload.ticket_code, db, event_id=current_admin.event_id
+            )
+        else:
+            raise CheckinError(400, "missing_identifier")
         perform_checkin(participant, db)
     except CheckinError as error:
         content: dict = {"ok": False, "reason": error.reason}

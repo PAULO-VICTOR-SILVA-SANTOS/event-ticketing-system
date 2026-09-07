@@ -4,7 +4,8 @@ from pydantic import BaseModel
 
 
 class CheckinRequest(BaseModel):
-    ticket_code: str
+    ticket_code: str | None = None
+    participant_id: int | None = None
 
 
 class CheckinStatsResponse(BaseModel):

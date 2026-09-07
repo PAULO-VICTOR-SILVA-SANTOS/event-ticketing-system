@@ -64,6 +64,7 @@
     already_checked_in: "Ingresso ja utilizado.",
     payment_pending: "Pagamento pendente.",
     invalid_ticket: "Ingresso invalido.",
+    not_found: "Participante nao encontrado.",
   };
 
   function checkinCell(p) {
@@ -73,19 +74,18 @@
         <div class="cell-sub">${formatDateTime(p.checkin_at)}</div>`;
     }
 
-    // Manual check-in matches by ticket_code, which is only generated once a
-    // participant is marked paid through the real payment flow (webhook) --
-    // an admin manually flipping status to "paid" doesn't create one, so the
-    // button must stay hidden rather than call checkin with a null/blank
-    // code (which could match the wrong participant on the backend).
-    const canCheckin = p.payment_status === "paid" && p.ticket_code;
+    // The button must always show for a paid, not-yet-checked-in participant
+    // -- whether or not a ticket_code exists is validated at click time
+    // (see the tbody click handler), not here, so a missing code never
+    // silently hides the action.
+    const canCheckin = p.payment_status === "paid";
 
     return `
       <div style="display:flex; align-items:center; gap:8px;">
         <span class="badge badge-muted"><i class="ti ti-minus"></i> Nao entrou</span>
         ${
           canCheckin
-            ? `<button class="btn btn-sm btn-outline" data-checkin="${escapeHtml(p.ticket_code)}" data-checkin-id="${p.id}">
+            ? `<button class="btn btn-sm btn-outline" data-checkin-id="${p.id}">
                 <i class="ti ti-check"></i> Check-in
               </button>`
             : ""
@@ -179,7 +179,7 @@
   tbody.addEventListener("click", async (event) => {
     const toggleBtn = event.target.closest("[data-toggle-payment]");
     const removeBtn = event.target.closest("[data-remove]");
-    const checkinBtn = event.target.closest("[data-checkin]");
+    const checkinBtn = event.target.closest("[data-checkin-id]");
 
     if (toggleBtn) {
       const id = toggleBtn.dataset.togglePayment;
@@ -221,12 +221,14 @@
     }
 
     if (checkinBtn) {
-      const ticketCode = checkinBtn.dataset.checkin;
       const id = checkinBtn.dataset.checkinId;
       checkinBtn.disabled = true;
 
       try {
-        const result = await Api.checkinByTicket(ticketCode);
+        const participant = allParticipants.find((p) => String(p.id) === String(id));
+        const result = participant && participant.ticket_code
+          ? await Api.checkinByTicket(participant.ticket_code)
+          : await Api.checkinByParticipantId(id);
         const index = allParticipants.findIndex((p) => String(p.id) === String(id));
         if (index !== -1) {
           allParticipants[index] = {

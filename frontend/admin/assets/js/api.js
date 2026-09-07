@@ -157,6 +157,13 @@ const Api = {
     });
   },
 
+  checkinByParticipantId(participantId) {
+    return apiRequest("/participants/checkin", {
+      method: "PATCH",
+      body: { participant_id: participantId },
+    });
+  },
+
   listExpenses() {
     return apiRequest("/expenses/");
   },
