@@ -35,7 +35,10 @@
     const feeCard = grossCard * MP_FEE_RATES.card;
     const gross = grossPix + grossCard;
     const totalFees = feePix + feeCard;
-    const net = gross - totalFees;
+    // Only the Pix fee is absorbed by the organizadora -- the card fee is
+    // passed on to whoever pays by card, so it's excluded from the "real"
+    // net figure (and from the expense totals below).
+    const net = gross - feePix;
 
     return { paidCount: paid.length, gross, feePix, feeCard, totalFees, net };
   }
@@ -83,7 +86,7 @@
       const fees = calculateMpFees(participants, ticketPrice);
       renderMpFees(fees);
 
-      const totalExpensesWithFees = parseFloat(dashboard.total_expenses) + fees.totalFees;
+      const totalExpensesWithFees = parseFloat(dashboard.total_expenses) + fees.feePix;
       const remainingWithFees = Math.max(totalExpensesWithFees - parseFloat(dashboard.total_collected), 0);
       const netPerPerson = fees.paidCount > 0 ? fees.net / fees.paidCount : ticketPrice;
 
