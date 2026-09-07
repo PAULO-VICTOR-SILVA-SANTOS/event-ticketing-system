@@ -1,5 +1,4 @@
 {
-  "cleanUrls": true,
   "rewrites": [
     { "source": "/admin", "destination": "/admin/login.html" },
     { "source": "/admin/login", "destination": "/admin/login.html" },
@@ -7,6 +6,6 @@
     { "source": "/admin/participants", "destination": "/admin/participants.html" },
     { "source": "/admin/expenses", "destination": "/admin/expenses.html" },
     { "source": "/admin/settings", "destination": "/admin/settings.html" },
-    { "source": "/portaria", "destination": "/public/portaria.html" }
+    { "source": "/portaria", "destination": "/portaria.html" }
   ]
 }
