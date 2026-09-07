@@ -21,8 +21,8 @@ app = FastAPI(
 
 # Local dev frontends (public ticketing page + admin panel served via
 # `python -m http.server`) plus any exact custom domain set via
-# EXTRA_CORS_ORIGIN. Any *.railway.app deploy preview/domain is matched
-# separately below via allow_origin_regex.
+# EXTRA_CORS_ORIGIN. Any *.railway.app or event-ticketing-system*.vercel.app
+# deploy preview/domain is matched separately below via allow_origin_regex.
 CORS_ORIGINS = [
     "http://localhost:5500",
     "http://localhost:5501",
@@ -32,10 +32,17 @@ CORS_ORIGINS = [
 if settings.EXTRA_CORS_ORIGIN:
     CORS_ORIGINS.append(settings.EXTRA_CORS_ORIGIN)
 
+# `$` anchors are required on every alternative below -- without one, e.g.
+# "https://event-ticketing-system-x.vercel.app.attacker.com" would also
+# match, since re.match only anchors the start of the string.
+CORS_ORIGIN_REGEX = (
+    r"https://(.*\.railway\.app|event-ticketing-system.*\.vercel\.app)$"
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_origin_regex=r"https://.*\.railway\.app",
+    allow_origin_regex=CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
