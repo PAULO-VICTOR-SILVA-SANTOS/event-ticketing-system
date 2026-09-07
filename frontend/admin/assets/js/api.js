@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8000/api/v1";
+const API_BASE_URL = "https://web-production-e71e8.up.railway.app/api/v1";
 const TOKEN_KEY = "admin_token";
 
 const Auth = {

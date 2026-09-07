@@ -1,6 +1,6 @@
 const API_BASE_URL = window.location.hostname.endsWith(".github.io")
   ? "https://your-backend-domain.example/api/v1"
-  : "http://127.0.0.1:8000/api/v1";
+  : "https://web-production-e71e8.up.railway.app/api/v1";
 
 async function apiRequest(path, { method = "GET", body, headers = {} } = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
