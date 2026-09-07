@@ -60,9 +60,37 @@
     return `<span class="badge badge-muted"><i class="ti ti-ban"></i> Expirada</span>`;
   }
 
-  function checkinBadge(p) {
-    if (p.checkin_done) return `<span class="badge badge-info"><i class="ti ti-door-enter"></i> Entrou</span>`;
-    return `<span class="badge badge-muted"><i class="ti ti-minus"></i> Nao entrou</span>`;
+  const CHECKIN_REASON_MESSAGES = {
+    already_checked_in: "Ingresso ja utilizado.",
+    payment_pending: "Pagamento pendente.",
+    invalid_ticket: "Ingresso invalido.",
+  };
+
+  function checkinCell(p) {
+    if (p.checkin_done) {
+      return `
+        <span class="badge badge-info"><i class="ti ti-circle-check"></i> Entrou</span>
+        <div class="cell-sub">${formatDateTime(p.checkin_at)}</div>`;
+    }
+
+    // Manual check-in matches by ticket_code, which is only generated once a
+    // participant is marked paid through the real payment flow (webhook) --
+    // an admin manually flipping status to "paid" doesn't create one, so the
+    // button must stay hidden rather than call checkin with a null/blank
+    // code (which could match the wrong participant on the backend).
+    const canCheckin = p.payment_status === "paid" && p.ticket_code;
+
+    return `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="badge badge-muted"><i class="ti ti-minus"></i> Nao entrou</span>
+        ${
+          canCheckin
+            ? `<button class="btn btn-sm btn-outline" data-checkin="${escapeHtml(p.ticket_code)}" data-checkin-id="${p.id}">
+                <i class="ti ti-check"></i> Check-in
+              </button>`
+            : ""
+        }
+      </div>`;
   }
 
   function methodLabel(method) {
@@ -102,7 +130,7 @@
             </td>
             <td>${methodLabel(p.payment_method)}</td>
             <td>${statusBadge(p.payment_status)}</td>
-            <td>${checkinBadge(p)}</td>
+            <td>${checkinCell(p)}</td>
             <td>
               <div style="display:flex; gap:8px;">
                 <button class="btn btn-sm btn-outline" data-toggle-payment="${p.id}" data-next-status="${nextStatus}">
@@ -151,6 +179,7 @@
   tbody.addEventListener("click", async (event) => {
     const toggleBtn = event.target.closest("[data-toggle-payment]");
     const removeBtn = event.target.closest("[data-remove]");
+    const checkinBtn = event.target.closest("[data-checkin]");
 
     if (toggleBtn) {
       const id = toggleBtn.dataset.togglePayment;
@@ -187,6 +216,31 @@
       } catch (err) {
         showToast(errorMessage(err), "error");
         removeBtn.disabled = false;
+      }
+      return;
+    }
+
+    if (checkinBtn) {
+      const ticketCode = checkinBtn.dataset.checkin;
+      const id = checkinBtn.dataset.checkinId;
+      checkinBtn.disabled = true;
+
+      try {
+        const result = await Api.checkinByTicket(ticketCode);
+        const index = allParticipants.findIndex((p) => String(p.id) === String(id));
+        if (index !== -1) {
+          allParticipants[index] = {
+            ...allParticipants[index],
+            checkin_done: true,
+            checkin_at: result.checkin_at,
+          };
+        }
+        showToast("Check-in confirmado.", "success");
+        render();
+      } catch (err) {
+        const reason = err.data && err.data.reason;
+        showToast(CHECKIN_REASON_MESSAGES[reason] || errorMessage(err), "error");
+        checkinBtn.disabled = false;
       }
     }
   });

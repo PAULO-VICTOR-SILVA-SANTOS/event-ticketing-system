@@ -150,6 +150,13 @@ const Api = {
     return apiRequest(`/participants/${participantId}`, { method: "DELETE" });
   },
 
+  checkinByTicket(ticketCode) {
+    return apiRequest("/participants/checkin", {
+      method: "PATCH",
+      body: { ticket_code: ticketCode },
+    });
+  },
+
   listExpenses() {
     return apiRequest("/expenses/");
   },
