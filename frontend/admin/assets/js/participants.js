@@ -25,6 +25,23 @@
     }
   }
 
+  function computeDuplicateIds(participants) {
+    const byEmail = new Map();
+    const byWhatsapp = new Map();
+    participants.forEach((p) => {
+      if (p.email) byEmail.set(p.email, (byEmail.get(p.email) || []).concat(p.id));
+      if (p.whatsapp) byWhatsapp.set(p.whatsapp, (byWhatsapp.get(p.whatsapp) || []).concat(p.id));
+    });
+
+    const duplicateIds = new Set();
+    [byEmail, byWhatsapp].forEach((map) => {
+      map.forEach((ids) => {
+        if (ids.length > 1) ids.forEach((id) => duplicateIds.add(id));
+      });
+    });
+    return duplicateIds;
+  }
+
   function getFiltered() {
     return allParticipants.filter((p) => {
       if (currentFilter === "paid" && p.payment_status !== "paid") return false;
@@ -54,6 +71,7 @@
 
   function render() {
     const filtered = getFiltered();
+    const duplicateIds = computeDuplicateIds(allParticipants);
     subtitle.textContent = `${filtered.length} de ${allParticipants.length} participante(s)`;
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -72,7 +90,10 @@
           return `
           <tr>
             <td>
-              <div class="cell-name">${escapeHtml(p.name)}</div>
+              <div class="cell-name">
+                ${escapeHtml(p.name)}
+                ${duplicateIds.has(p.id) ? `<span class="badge badge-warning" style="margin-left:8px;" title="Outro participante com mesmo e-mail ou WhatsApp"><i class="ti ti-alert-triangle"></i> Duplicado</span>` : ""}
+              </div>
               ${p.nickname ? `<div class="cell-sub">${escapeHtml(p.nickname)}</div>` : ""}
             </td>
             <td>
@@ -83,9 +104,14 @@
             <td>${statusBadge(p.payment_status)}</td>
             <td>${checkinBadge(p)}</td>
             <td>
-              <button class="btn btn-sm btn-outline" data-toggle-payment="${p.id}" data-next-status="${nextStatus}">
-                <i class="ti ${actionIcon}"></i> ${actionLabel}
-              </button>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-sm btn-outline" data-toggle-payment="${p.id}" data-next-status="${nextStatus}">
+                  <i class="ti ${actionIcon}"></i> ${actionLabel}
+                </button>
+                <button class="btn btn-sm btn-danger" data-remove="${p.id}" title="Remover participante">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>`;
         })
@@ -123,25 +149,45 @@
   }
 
   tbody.addEventListener("click", async (event) => {
-    const btn = event.target.closest("[data-toggle-payment]");
-    if (!btn) return;
+    const toggleBtn = event.target.closest("[data-toggle-payment]");
+    const removeBtn = event.target.closest("[data-remove]");
 
-    const id = btn.dataset.togglePayment;
-    const nextStatus = btn.dataset.nextStatus;
-    btn.disabled = true;
+    if (toggleBtn) {
+      const id = toggleBtn.dataset.togglePayment;
+      const nextStatus = toggleBtn.dataset.nextStatus;
+      toggleBtn.disabled = true;
 
-    try {
-      const updated = await Api.setPaymentStatus(id, nextStatus);
-      const index = allParticipants.findIndex((p) => String(p.id) === String(id));
-      if (index !== -1) allParticipants[index] = updated;
-      showToast(
-        nextStatus === "paid" ? "Pagamento confirmado." : "Pagamento revertido para pendente.",
-        "success"
-      );
-      render();
-    } catch (err) {
-      showToast(errorMessage(err), "error");
-      btn.disabled = false;
+      try {
+        const updated = await Api.setPaymentStatus(id, nextStatus);
+        const index = allParticipants.findIndex((p) => String(p.id) === String(id));
+        if (index !== -1) allParticipants[index] = updated;
+        showToast(
+          nextStatus === "paid" ? "Pagamento confirmado." : "Pagamento revertido para pendente.",
+          "success"
+        );
+        render();
+      } catch (err) {
+        showToast(errorMessage(err), "error");
+        toggleBtn.disabled = false;
+      }
+      return;
+    }
+
+    if (removeBtn) {
+      const id = removeBtn.dataset.remove;
+      const confirmed = await confirmAction("Tem certeza que deseja remover este participante?");
+      if (!confirmed) return;
+
+      removeBtn.disabled = true;
+      try {
+        await Api.deleteParticipant(id);
+        allParticipants = allParticipants.filter((p) => String(p.id) !== String(id));
+        showToast("Participante removido.", "success");
+        render();
+      } catch (err) {
+        showToast(errorMessage(err), "error");
+        removeBtn.disabled = false;
+      }
     }
   });
 

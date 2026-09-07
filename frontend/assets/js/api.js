@@ -47,6 +47,13 @@ const Api = {
     });
   },
 
+  checkDuplicate(eventId, email, whatsapp) {
+    const params = new URLSearchParams({ event_id: eventId });
+    if (email) params.set("email", email);
+    if (whatsapp) params.set("whatsapp", whatsapp);
+    return apiRequest(`/participants/check-duplicate?${params.toString()}`);
+  },
+
   createPixPayment(participantId, eventId) {
     return apiRequest("/payments/pix", {
       method: "POST",

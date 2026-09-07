@@ -16,6 +16,17 @@ class ParticipantCreate(BaseModel):
     payment_method: PaymentMethod
 
 
+class DuplicateParticipantInfo(BaseModel):
+    name: str
+    payment_status: PaymentStatus
+    payment_method: PaymentMethod
+
+
+class DuplicateCheckResponse(BaseModel):
+    duplicate: bool
+    participant: DuplicateParticipantInfo | None = None
+
+
 class ParticipantResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

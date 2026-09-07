@@ -141,6 +141,23 @@
     </div>
   </div>
 
+  <div id="duplicate-modal-overlay" class="duplicate-modal-overlay hidden">
+    <div class="duplicate-modal">
+      <h3><i class="ti ti-alert-triangle"></i> Cadastro ja existente</h3>
+      <p>Ja encontramos um cadastro com esse e-mail ou telefone.</p>
+      <div class="duplicate-modal__details">
+        <div><span>Nome</span> <strong id="duplicate-name"></strong></div>
+        <div><span>Status</span> <strong id="duplicate-status"></strong></div>
+        <div><span>Forma de pagamento</span> <strong id="duplicate-method"></strong></div>
+      </div>
+      <p>Deseja continuar com um novo cadastro ou cancelar?</p>
+      <div class="duplicate-modal__actions">
+        <button type="button" class="btn btn-ghost" id="duplicate-cancel-btn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="duplicate-continue-btn">Continuar mesmo assim</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/public.js"></script>

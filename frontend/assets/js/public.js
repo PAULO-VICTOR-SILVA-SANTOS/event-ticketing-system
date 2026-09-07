@@ -99,6 +99,33 @@
     }
   }
 
+  const STATUS_LABELS = { paid: "Pago", pending: "Pendente", expired: "Expirado" };
+  const METHOD_LABELS = { pix: "PIX", card: "Cartao" };
+
+  function confirmDuplicate(participant) {
+    return new Promise((resolve) => {
+      const overlay = el("duplicate-modal-overlay");
+      el("duplicate-name").textContent = participant.name;
+      el("duplicate-status").textContent = STATUS_LABELS[participant.payment_status] || participant.payment_status;
+      el("duplicate-method").textContent = METHOD_LABELS[participant.payment_method] || participant.payment_method;
+
+      overlay.classList.remove("hidden");
+
+      const cleanup = (result) => {
+        overlay.classList.add("hidden");
+        continueBtn.removeEventListener("click", onContinue);
+        cancelBtn.removeEventListener("click", onCancel);
+        resolve(result);
+      };
+      const continueBtn = el("duplicate-continue-btn");
+      const cancelBtn = el("duplicate-cancel-btn");
+      const onContinue = () => cleanup(true);
+      const onCancel = () => cleanup(false);
+      continueBtn.addEventListener("click", onContinue);
+      cancelBtn.addEventListener("click", onCancel);
+    });
+  }
+
   function setSubmitting(isSubmitting) {
     const btn = el("submit-btn");
     btn.disabled = isSubmitting;
@@ -124,6 +151,20 @@
     };
 
     setSubmitting(true);
+    try {
+      const duplicateCheck = await Api.checkDuplicate(EVENT_ID, payload.email, payload.whatsapp);
+      if (duplicateCheck.duplicate) {
+        const shouldContinue = await confirmDuplicate(duplicateCheck.participant);
+        if (!shouldContinue) {
+          setSubmitting(false);
+          return;
+        }
+      }
+    } catch (err) {
+      // duplicate check is a soft warning, not a hard requirement -- if it
+      // fails (network issue, etc.) the registration itself still validates.
+    }
+
     try {
       const participant = await Api.createParticipant(EVENT_ID, payload);
       form.classList.add("hidden");

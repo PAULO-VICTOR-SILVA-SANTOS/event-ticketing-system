@@ -146,6 +146,10 @@ const Api = {
     });
   },
 
+  deleteParticipant(participantId) {
+    return apiRequest(`/participants/${participantId}`, { method: "DELETE" });
+  },
+
   listExpenses() {
     return apiRequest("/expenses/");
   },

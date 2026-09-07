@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -10,7 +11,12 @@ from app.models.admin_user import AdminUser
 from app.models.event import Event
 from app.models.participant import Participant, PaymentStatus
 from app.schemas.checkin import CheckinRequest
-from app.schemas.participant import ParticipantCreate, ParticipantResponse
+from app.schemas.participant import (
+    DuplicateCheckResponse,
+    DuplicateParticipantInfo,
+    ParticipantCreate,
+    ParticipantResponse,
+)
 from app.services.checkin_service import (
     CheckinError,
     find_participant_by_ticket_code,
@@ -30,6 +36,40 @@ def _get_scoped_participant(
             status_code=status.HTTP_404_NOT_FOUND, detail="Participante nao encontrado"
         )
     return participant
+
+
+@router.get("/check-duplicate", response_model=DuplicateCheckResponse)
+def check_duplicate(
+    event_id: int,
+    email: str | None = None,
+    whatsapp: str | None = None,
+    db: Session = Depends(get_db),
+) -> DuplicateCheckResponse:
+    if not email and not whatsapp:
+        return DuplicateCheckResponse(duplicate=False)
+
+    conditions = []
+    if email:
+        conditions.append(Participant.email == email)
+    if whatsapp:
+        conditions.append(Participant.whatsapp == whatsapp)
+
+    participant = (
+        db.query(Participant)
+        .filter(Participant.event_id == event_id, or_(*conditions))
+        .first()
+    )
+    if participant is None:
+        return DuplicateCheckResponse(duplicate=False)
+
+    return DuplicateCheckResponse(
+        duplicate=True,
+        participant=DuplicateParticipantInfo(
+            name=participant.name,
+            payment_status=participant.payment_status,
+            payment_method=participant.payment_method,
+        ),
+    )
 
 
 @router.post("/", response_model=ParticipantResponse, status_code=status.HTTP_201_CREATED)
@@ -97,6 +137,17 @@ def confirm_payment(
     db.commit()
     db.refresh(participant)
     return participant
+
+
+@router.delete("/{participant_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_participant(
+    participant_id: int,
+    db: Session = Depends(get_db),
+    current_admin: AdminUser = Depends(get_current_user),
+) -> None:
+    participant = _get_scoped_participant(participant_id, current_admin, db)
+    db.delete(participant)
+    db.commit()
 
 
 @router.patch("/checkin", response_model=None)
