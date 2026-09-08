@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import base64
 import datetime as dt
 import io
 import json
 import logging
 import uuid
+from typing import Optional
 
 import qrcode
 import resend
@@ -26,14 +26,26 @@ def _resend_ready() -> bool:
     return True
 
 
-def _send_email(to: str, subject: str, html: str) -> None:
+def _send_email(
+    to: str,
+    subject: str,
+    html: str,
+    attachments: Optional[list[resend.Attachment]] = None,
+) -> None:
     if not _resend_ready():
         return
 
+    params: resend.Emails.SendParams = {
+        "from": settings.RESEND_FROM_EMAIL,
+        "to": to,
+        "subject": subject,
+        "html": html,
+    }
+    if attachments:
+        params["attachments"] = attachments
+
     try:
-        resend.Emails.send(
-            {"from": settings.RESEND_FROM_EMAIL, "to": to, "subject": subject, "html": html}
-        )
+        resend.Emails.send(params)
     except Exception:
         logger.exception("Falha ao enviar e-mail via Resend para %s", to)
 
@@ -62,7 +74,7 @@ def send_registration_email(
     _send_email(participant_email, f"Inscricao confirmada - {event_name}", html)
 
 
-def _generate_ticket_qr_code_base64(payload: dict) -> str:
+def _generate_ticket_qr_code_png(payload: dict) -> bytes:
     qr = qrcode.QRCode(border=2)
     qr.add_data(json.dumps(payload))
     qr.make(fit=True)
@@ -70,20 +82,26 @@ def _generate_ticket_qr_code_base64(payload: dict) -> str:
 
     buffer = io.BytesIO()
     image.save(buffer, format="PNG")
-    return base64.b64encode(buffer.getvalue()).decode("ascii")
+    return buffer.getvalue()
 
 
 def send_ticket_email(participant: Participant, event: Event) -> None:
     if not participant.ticket_code:
         participant.ticket_code = str(uuid.uuid4())
 
-    qr_code_base64 = _generate_ticket_qr_code_base64(
+    qr_code_png = _generate_ticket_qr_code_png(
         {
             "participant_id": participant.id,
             "event_id": participant.event_id,
             "ticket_code": participant.ticket_code,
         }
     )
+    qr_attachment: resend.Attachment = {
+        "filename": "qrcode.png",
+        "content": list(qr_code_png),
+        "content_type": "image/png",
+        "content_id": "qrcode",
+    }
 
     html = f"""
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;
@@ -108,7 +126,7 @@ def send_ticket_email(participant: Participant, event: Event) -> None:
           </tr>
         </table>
         <div style="text-align: center; margin: 24px 0;">
-          <img src="data:image/png;base64,{qr_code_base64}" alt="QR Code do ingresso"
+          <img src="cid:qrcode" alt="QR Code do ingresso"
                style="width: 220px; height: 220px;" />
           <p style="color: #999; font-size: 12px; margin-top: 8px;">
             Codigo: {participant.ticket_code}
@@ -120,7 +138,9 @@ def send_ticket_email(participant: Participant, event: Event) -> None:
       </div>
     </div>
     """
-    _send_email(participant.email, f"Seu ingresso - {event.name}", html)
+    _send_email(
+        participant.email, f"Seu ingresso - {event.name}", html, attachments=[qr_attachment]
+    )
 
 
 def send_reminder_email(
