@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import datetime as dt
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.admin_user import AdminUser
 from app.models.event import Event
-from app.models.participant import Participant, PaymentStatus
+from app.models.participant import PENDING_REGISTRATION_TTL, Participant, PaymentStatus
 from app.schemas.checkin import CheckinRequest
 from app.schemas.participant import (
     DuplicateCheckResponse,
@@ -87,11 +89,24 @@ def create_participant(
             detail="Evento nao encontrado ou inativo",
         )
 
+    # PENDING only holds a slot within PENDING_REGISTRATION_TTL of being
+    # created -- past that it's treated as an abandoned checkout and ignored
+    # here (see the constant's docstring). PAID always counts; EXPIRED never
+    # does. This is a query-time filter only -- the row itself still says
+    # "pending" until the scheduled job in services/expiration_service.py
+    # gets to it.
+    stale_cutoff = dt.datetime.now(dt.timezone.utc) - PENDING_REGISTRATION_TTL
     active_registrations = (
         db.query(Participant)
         .filter(
             Participant.event_id == event_id,
-            Participant.payment_status != PaymentStatus.EXPIRED,
+            or_(
+                Participant.payment_status == PaymentStatus.PAID,
+                and_(
+                    Participant.payment_status == PaymentStatus.PENDING,
+                    Participant.created_at >= stale_cutoff,
+                ),
+            ),
         )
         .count()
     )

@@ -24,6 +24,16 @@ class PaymentStatus(str, enum.Enum):
     EXPIRED = "expired"
 
 
+# How long a PENDING registration (checkout started, never paid) is allowed
+# to hold a capacity slot. Past this, routes/participants.py's capacity
+# count treats it as if it weren't there (abandoned-checkout protection --
+# someone opening the Pix QR and never paying shouldn't be able to lock a
+# seat forever), and services/expiration_service.py's scheduled job flips
+# it to EXPIRED in the database so the data reflects reality, not just the
+# capacity query. Single source of truth for both -- keep them in sync.
+PENDING_REGISTRATION_TTL = dt.timedelta(minutes=20)
+
+
 class Participant(Base):
     __tablename__ = "participants"
 

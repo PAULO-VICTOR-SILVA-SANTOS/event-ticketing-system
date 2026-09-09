@@ -1,7 +1,10 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.scheduler import start_scheduler, stop_scheduler
 from app.routes import (
     auth,
     checkin,
@@ -13,10 +16,19 @@ from app.routes import (
     public_config,
 )
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+    stop_scheduler()
+
+
 app = FastAPI(
     title="Event Ticketing System",
     description="API para gerenciamento e venda de ingressos para eventos.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Local dev frontends (public ticketing page + admin panel served via
