@@ -76,7 +76,11 @@ def check_duplicate(
 def create_participant(
     payload: ParticipantCreate, event_id: int, db: Session = Depends(get_db)
 ) -> Participant:
-    event = db.get(Event, event_id)
+    # Locks the event row for the rest of this transaction so concurrent
+    # registrations for the same event serialize instead of racing on the
+    # capacity count below (classic check-then-act TOCTOU otherwise -- see
+    # the concurrency test in backend/test_concurrency.py).
+    event = db.query(Event).filter(Event.id == event_id).with_for_update().first()
     if event is None or not event.is_active:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

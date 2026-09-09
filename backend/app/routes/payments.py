@@ -177,8 +177,15 @@ async def payment_webhook(request: Request, db: Session = Depends(get_db)) -> di
     if result["status"] != "approved":
         return {"status": "received"}
 
+    # Locked for the rest of this transaction so a duplicate webhook delivery
+    # for the same payment (Mercado Pago retries/redelivers) blocks until this
+    # one commits, then sees payment_status already PAID below instead of
+    # racing past the check-then-act and sending a second ticket e-mail.
     participant = (
-        db.query(Participant).filter(Participant.mp_payment_id == str(payment_id)).first()
+        db.query(Participant)
+        .filter(Participant.mp_payment_id == str(payment_id))
+        .with_for_update()
+        .first()
     )
     if participant is None:
         return {"status": "participant_not_found"}
