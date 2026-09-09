@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
@@ -94,7 +94,7 @@ def check_duplicate(
 
 @router.post("/", response_model=ParticipantResponse, status_code=status.HTTP_201_CREATED)
 def create_participant(
-    payload: ParticipantCreate, event_id: int, db: Session = Depends(get_db)
+    payload: ParticipantCreate, event_id: int, response: Response, db: Session = Depends(get_db)
 ) -> Participant:
     # Locks the event row for the rest of this transaction so concurrent
     # registrations for the same event serialize instead of racing on the
@@ -130,10 +130,25 @@ def create_participant(
         .first()
     )
     if duplicate is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ja existe um cadastro ativo com esse e-mail ou WhatsApp para este evento",
-        )
+        if duplicate.payment_status == PaymentStatus.PAID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ja existe um cadastro pago com esse e-mail ou WhatsApp para este evento",
+            )
+
+        # PENDING within the TTL: this is the same person mid-checkout, not a
+        # new registration attempt (e.g. tried Pix, wants to switch to Card).
+        # Resume that row -- letting the payment method change -- instead of
+        # rejecting it, so they aren't blocked from finishing their own
+        # in-progress signup.
+        if duplicate.payment_method != payload.payment_method:
+            duplicate.payment_method = payload.payment_method
+            db.commit()
+            db.refresh(duplicate)
+
+        response.status_code = status.HTTP_200_OK
+        duplicate.reused = True
+        return duplicate
 
     active_registrations = (
         db.query(Participant).filter(_active_registration_condition(event_id, stale_cutoff)).count()

@@ -22,6 +22,8 @@
   --danger-bg: rgba(239, 68, 68, 0.12);
   --warning: #f59e0b;
   --warning-bg: rgba(245, 158, 11, 0.12);
+  --info: #22d3ee;
+  --info-bg: rgba(34, 211, 238, 0.12);
 
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -417,6 +419,11 @@ input:focus {
 .alert-success {
   background: var(--success-bg);
   color: #86efac;
+}
+
+.alert-info {
+  background: var(--info-bg);
+  color: #67e8f9;
 }
 
 /* PIX result */

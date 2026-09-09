@@ -44,3 +44,7 @@ class ParticipantResponse(BaseModel):
     checkin_done: bool
     checkin_at: dt.datetime | None = None
     created_at: dt.datetime
+    # True only when POST /participants/ resolved to an existing pending
+    # registration (same event, same e-mail/WhatsApp, within the TTL)
+    # instead of creating a new row -- see routes/participants.py.
+    reused: bool = False

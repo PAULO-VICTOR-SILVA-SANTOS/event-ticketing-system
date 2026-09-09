@@ -105,9 +105,28 @@
   function confirmDuplicate(participant) {
     return new Promise((resolve) => {
       const overlay = el("duplicate-modal-overlay");
+      const isPending = participant.payment_status === "pending";
+
       el("duplicate-name").textContent = participant.name;
       el("duplicate-status").textContent = STATUS_LABELS[participant.payment_status] || participant.payment_status;
       el("duplicate-method").textContent = METHOD_LABELS[participant.payment_method] || participant.payment_method;
+
+      // Pending duplicates get resumed (same registration, payment method
+      // can change) instead of blocked -- see handleRegistration/POST
+      // /participants/. Paid ones are still a hard block, copy stays as-is.
+      if (isPending) {
+        el("duplicate-title").textContent = "Voce ja tem uma inscricao em andamento";
+        el("duplicate-intro").textContent =
+          "Encontramos uma inscricao aguardando pagamento com esse e-mail ou telefone.";
+        el("duplicate-question").textContent =
+          "Deseja continuar essa inscricao com a forma de pagamento selecionada?";
+        el("duplicate-continue-btn").textContent = "Continuar inscricao";
+      } else {
+        el("duplicate-title").textContent = "Cadastro ja existente";
+        el("duplicate-intro").textContent = "Ja encontramos um cadastro com esse e-mail ou telefone.";
+        el("duplicate-question").textContent = "Deseja continuar com um novo cadastro ou cancelar?";
+        el("duplicate-continue-btn").textContent = "Continuar mesmo assim";
+      }
 
       overlay.classList.remove("hidden");
 
@@ -169,6 +188,16 @@
       const participant = await Api.createParticipant(EVENT_ID, payload);
       form.classList.add("hidden");
       el("payment-card").classList.remove("hidden");
+
+      if (participant.reused) {
+        showAlert(
+          "resume-alert",
+          "resume-alert-text",
+          "Voce ja tem uma inscricao em andamento aguardando pagamento. Continuando com a forma de pagamento selecionada."
+        );
+      } else {
+        hideAlert("resume-alert");
+      }
 
       if (paymentMethod === "pix") {
         await startPixPayment(participant);

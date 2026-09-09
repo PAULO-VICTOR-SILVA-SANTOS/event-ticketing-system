@@ -101,6 +101,11 @@
     </div>
 
     <section id="payment-card" class="card hidden">
+      <div id="resume-alert" class="alert alert-info hidden">
+        <i class="ti ti-info-circle"></i>
+        <span id="resume-alert-text"></span>
+      </div>
+
       <div id="pix-panel" class="hidden">
         <h2 class="card__title">Pague com Pix</h2>
         <p class="card__subtitle">Escaneie o QR Code ou copie o codigo abaixo.</p>
@@ -143,14 +148,14 @@
 
   <div id="duplicate-modal-overlay" class="duplicate-modal-overlay hidden">
     <div class="duplicate-modal">
-      <h3><i class="ti ti-alert-triangle"></i> Cadastro ja existente</h3>
-      <p>Ja encontramos um cadastro com esse e-mail ou telefone.</p>
+      <h3><i class="ti ti-alert-triangle"></i> <span id="duplicate-title">Cadastro ja existente</span></h3>
+      <p id="duplicate-intro">Ja encontramos um cadastro com esse e-mail ou telefone.</p>
       <div class="duplicate-modal__details">
         <div><span>Nome</span> <strong id="duplicate-name"></strong></div>
         <div><span>Status</span> <strong id="duplicate-status"></strong></div>
         <div><span>Forma de pagamento</span> <strong id="duplicate-method"></strong></div>
       </div>
-      <p>Deseja continuar com um novo cadastro ou cancelar?</p>
+      <p id="duplicate-question">Deseja continuar com um novo cadastro ou cancelar?</p>
       <div class="duplicate-modal__actions">
         <button type="button" class="btn btn-ghost" id="duplicate-cancel-btn">Cancelar</button>
         <button type="button" class="btn btn-primary" id="duplicate-continue-btn">Continuar mesmo assim</button>
