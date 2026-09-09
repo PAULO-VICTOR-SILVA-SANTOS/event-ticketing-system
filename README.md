@@ -13,121 +13,122 @@ Este sistema foi desenvolvido para um evento corporativo real — uma confratern
 
 **Backend**
 - Python 3.13
-- - FastAPI
-  - - SQLAlchemy
-    - - Alembic (migrações)
-      - - PostgreSQL (Supabase)
-        - - JWT (autenticação)
-         
-          - **Frontend**
-          - - HTML5, CSS3 e JavaScript puro (sem framework)
-            - - Painel administrativo completo + página pública de venda
-             
-              - **Pagamentos**
-              - - Mercado Pago — Pix e Cartão de crédito via Checkout Bricks
-                - - Webhook para confirmação automática de pagamento
-                 
-                  - **E-mail transacional**
-                  - - Resend
-                   
-                    - **Geração de ingresso**
-                    - - qrcode + Pillow
-                     
-                      - **Deploy**
-                      - - Backend: Railway
-                        - - Frontend: Vercel
-                          - - Banco de dados: Supabase
-                           
-                            - ## Funcionalidades
-                           
-                            - Tudo listado abaixo já está implementado e em produção:
-                           
-                            - - Cadastro de participantes com detecção de duplicata (por e-mail ou WhatsApp)
-                              - - Pagamento via Pix (QR Code dinâmico) e Cartão de crédito, processados pelo Mercado Pago
-                                - - Confirmação automática de pagamento via webhook
-                                  - - Emissão de ingresso digital com QR Code, enviado automaticamente por e-mail (Resend)
-                                    - - Check-in por QR Code na portaria do evento
-                                      - - Painel administrativo completo:
-                                        -   - Dashboard com métricas do evento
-                                            -   - Gestão de participantes
-                                                -   - Gestão de despesas, com cálculo automático das taxas do Mercado Pago
-                                                    -   - Configurações do evento
-                                                        - - Tema claro/escuro no painel
-                                                          - - Proteção contra concorrência: lock a nível de banco para evitar overselling de vagas e cadastros duplicados em acessos simultâneos
-                                                            - - Expiração automática de cadastros pendentes não pagos (TTL de 20 minutos), liberando a vaga automaticamente
-                                                             
-                                                              - ## Instalação e execução local
-                                                             
-                                                              - ### Pré-requisitos
-                                                             
-                                                              - - Python 3.13+
-                                                                - - PostgreSQL (ou uma instância Supabase)
-                                                                  - - Conta no Mercado Pago (credenciais de teste ou produção)
-                                                                    - - Conta no Resend
-                                                                     
-                                                                      - ### Passos
-                                                                     
-                                                                      - 1. Clone o repositório
-                                                                       
-                                                                        2. ```bash
-                                                                           git clone https://github.com/PAULO-VICTOR-SILVA-SANTOS/event-ticketing-system.git
-                                                                           cd event-ticketing-system
-                                                                           ```
+- FastAPI
+- SQLAlchemy
+- Alembic (migrações)
+- PostgreSQL (Supabase)
+- JWT (autenticação)
 
-                                                                           2. Crie e ative um ambiente virtual
-                                                                          
-                                                                           3. ```bash
-                                                                              python3.13 -m venv venv
-                                                                              source venv/bin/activate  # Windows: venv\Scripts\activate
-                                                                              ```
+**Frontend**
+- HTML5, CSS3 e JavaScript puro (sem framework)
+- Painel administrativo completo + página pública de venda
 
-                                                                              3. Instale as dependências
-                                                                             
-                                                                              4. ```bash
-                                                                                 pip install -r requirements.txt
-                                                                                 ```
+**Pagamentos**
+- Mercado Pago — Pix e Cartão de crédito via Checkout Bricks
+- Webhook para confirmação automática de pagamento
 
-                                                                                 4. Configure as variáveis de ambiente
-                                                                                
-                                                                                 5. Crie um arquivo `.env` na raiz do projeto com base no `.env.example`, incluindo:
-                                                                                
-                                                                                 6. DATABASE_URL=
-                                                                                 7. SECRET_KEY=
-                                                                                 8. MP_ACCESS_TOKEN=
-                                                                                 9. MP_PUBLIC_KEY=
-                                                                                 10. RESEND_API_KEY=
-                                                                                 11. RESEND_FROM_EMAIL=
-                                                                                
-                                                                              5. 5. Execute as migrações
-                                                                                
-                                                                                 6. ```bash
-                                                                                    alembic upgrade head
-                                                                                    ```
+**E-mail transacional**
+- Resend
 
-                                                                                    6. Suba a aplicação
-                                                                                   
-                                                                                    7. ```bash
-                                                                                       uvicorn backend.app.main:app --reload
-                                                                                       ```
+**Geração de ingresso**
+- qrcode + Pillow
 
-                                                                                       A API estará disponível em `http://localhost:8000`, com documentação interativa em `/docs`.
+**Deploy**
+- Backend: Railway
+- Frontend: Vercel
+- Banco de dados: Supabase
 
-                                                                                       7. Abra o frontend
-                                                                                      
-                                                                                       8. Sirva os arquivos estáticos da pasta `frontend/` com um servidor local simples, por exemplo:
-                                                                                      
-                                                                                       9. ```bash
-                                                                                          npx serve frontend
-                                                                                          ```
+## Funcionalidades
 
-                                                                                          Ou use a extensão Live Server do VS Code, apontando para `frontend/index.html`.
+Tudo listado abaixo já está implementado e em produção:
 
-                                                                                          ## Próximos passos
+- Cadastro de participantes com detecção de duplicata (por e-mail ou WhatsApp)
+- Pagamento via Pix (QR Code dinâmico) e Cartão de crédito, processados pelo Mercado Pago
+- Confirmação automática de pagamento via webhook
+- Emissão de ingresso digital com QR Code, enviado automaticamente por e-mail (Resend)
+- Check-in por QR Code na portaria do evento
+- Painel administrativo completo:
+  - Dashboard com métricas do evento
+  - Gestão de participantes
+  - Gestão de despesas, com cálculo automático das taxas do Mercado Pago
+  - Configurações do evento
+- Tema claro/escuro no painel
+- Proteção contra concorrência: lock a nível de banco para evitar overselling de vagas e cadastros duplicados em acessos simultâneos
+- Expiração automática de cadastros pendentes não pagos (TTL de 20 minutos), liberando a vaga automaticamente
 
-                                                                                          - Lembrete automático 48h antes do evento (scheduler)
-                                                                                          - - Testes automatizados com cobertura completa (pytest)
-                                                                                           
-                                                                                            - ## Licença
-                                                                                           
-                                                                                            - Este projeto está sob a licença MIT.
-                                                                                            - 
+## Instalação e execução local
+
+### Pré-requisitos
+
+- Python 3.13+
+- PostgreSQL (ou uma instância Supabase)
+- Conta no Mercado Pago (credenciais de teste ou produção)
+- Conta no Resend
+
+### Passos
+
+1. Clone o repositório
+
+```bash
+git clone https://github.com/PAULO-VICTOR-SILVA-SANTOS/event-ticketing-system.git
+cd event-ticketing-system
+```
+
+2. Crie e ative um ambiente virtual
+
+```bash
+python3.13 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+```
+
+3. Instale as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Configure as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com base no `.env.example`, incluindo:
+
+```
+DATABASE_URL=
+SECRET_KEY=
+MP_ACCESS_TOKEN=
+MP_PUBLIC_KEY=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+```
+
+5. Execute as migrações
+
+```bash
+alembic upgrade head
+```
+
+6. Suba a aplicação
+
+```bash
+uvicorn backend.app.main:app --reload
+```
+
+A API estará disponível em `http://localhost:8000`, com documentação interativa em `/docs`.
+
+7. Abra o frontend
+
+Sirva os arquivos estáticos da pasta `frontend/` com um servidor local simples, por exemplo:
+
+```bash
+npx serve frontend
+```
+
+Ou use a extensão Live Server do VS Code, apontando para `frontend/index.html`.
+
+## Próximos passos
+
+- Lembrete automático 48h antes do evento (scheduler)
+- Testes automatizados com cobertura completa (pytest)
+
+## Licença
+
+Este projeto está sob a licença MIT.
