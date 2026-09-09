@@ -29,6 +29,24 @@ from app.services.email_service import send_registration_email
 router = APIRouter(prefix="/participants", tags=["participants"])
 
 
+def _active_registration_condition(event_id: int, stale_cutoff: dt.datetime):
+    # "Active" = counts as a real registration right now: PAID always does;
+    # PENDING only within PENDING_REGISTRATION_TTL of creation (past that
+    # it's an abandoned checkout, see the constant's docstring). Shared by
+    # the capacity count and the duplicate check below so both agree on
+    # what counts as "this person already has a spot".
+    return and_(
+        Participant.event_id == event_id,
+        or_(
+            Participant.payment_status == PaymentStatus.PAID,
+            and_(
+                Participant.payment_status == PaymentStatus.PENDING,
+                Participant.created_at >= stale_cutoff,
+            ),
+        ),
+    )
+
+
 def _get_scoped_participant(
     participant_id: int, current_admin: AdminUser, db: Session
 ) -> Participant:
@@ -89,26 +107,36 @@ def create_participant(
             detail="Evento nao encontrado ou inativo",
         )
 
-    # PENDING only holds a slot within PENDING_REGISTRATION_TTL of being
-    # created -- past that it's treated as an abandoned checkout and ignored
-    # here (see the constant's docstring). PAID always counts; EXPIRED never
-    # does. This is a query-time filter only -- the row itself still says
-    # "pending" until the scheduled job in services/expiration_service.py
-    # gets to it.
+    # This is a query-time filter only -- a stale/rejected row's own
+    # payment_status still says "pending" until the scheduled job in
+    # services/expiration_service.py gets to it.
     stale_cutoff = dt.datetime.now(dt.timezone.utc) - PENDING_REGISTRATION_TTL
-    active_registrations = (
+
+    # Real duplicate guard: reusing the event-row lock above means only one
+    # registration for this event runs this check at a time, so two
+    # concurrent submissions for the same person can't both slip past it.
+    # GET /participants/check-duplicate (unchanged) is a separate, softer,
+    # frontend-facing warning -- this is what actually stops a second row
+    # from being created if that warning is ignored or skipped.
+    duplicate = (
         db.query(Participant)
         .filter(
-            Participant.event_id == event_id,
+            _active_registration_condition(event_id, stale_cutoff),
             or_(
-                Participant.payment_status == PaymentStatus.PAID,
-                and_(
-                    Participant.payment_status == PaymentStatus.PENDING,
-                    Participant.created_at >= stale_cutoff,
-                ),
+                Participant.email == payload.email,
+                Participant.whatsapp == payload.whatsapp,
             ),
         )
-        .count()
+        .first()
+    )
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ja existe um cadastro ativo com esse e-mail ou WhatsApp para este evento",
+        )
+
+    active_registrations = (
+        db.query(Participant).filter(_active_registration_condition(event_id, stale_cutoff)).count()
     )
     if active_registrations >= event.max_capacity:
         raise HTTPException(
