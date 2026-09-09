@@ -131,4 +131,4 @@ Ou use a extensão Live Server do VS Code, apontando para `frontend/index.html`.
 
 ## Licença
 
-Este projeto está sob a licença MIT.
+Este código está disponível publicamente para fins de portfólio e avaliação técnica. Uso, cópia ou redistribuição para fins comerciais não são permitidos sem autorização prévia do autor.
