@@ -2,7 +2,6 @@
 
 Sistema completo para venda e gestão de ingressos de eventos, com pagamento via Pix e cartão de crédito, emissão de ingresso digital com QR Code e check-in na portaria em tempo real.
 
-🔗 **[Acesse o sistema em produção](https://event-ticketing-system-five.vercel.app)**
 📄 **[Documentação da API](https://web-production-e71e8.up.railway.app/docs)**
 
 ## Sobre o projeto
