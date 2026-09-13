@@ -124,12 +124,70 @@ const Api = {
     return apiRequest(`/events/${eventId}`, { method: "PUT", body: payload });
   },
 
+  async uploadEventBanner(eventId, file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const token = Auth.getToken();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/banner`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    if (response.status === 401) {
+      Auth.logout();
+      throw new Error("Sessao expirada. Faca login novamente.");
+    }
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const message = (data && data.detail) || "Nao foi possivel enviar a imagem.";
+      const error = new Error(message);
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  },
+
   getConfigStatus() {
     return apiRequest("/config/status");
   },
 
   listParticipants() {
     return apiRequest("/participants/");
+  },
+
+  async downloadPaidParticipantsReport() {
+    const token = Auth.getToken();
+    const response = await fetch(`${API_BASE_URL}/participants/report/pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+
+    if (response.status === 401) {
+      Auth.logout();
+      throw new Error("Sessao expirada. Faca login novamente.");
+    }
+
+    if (!response.ok) {
+      let message = "Nao foi possivel gerar o relatorio.";
+      try {
+        const data = await response.json();
+        if (data && data.detail) message = data.detail;
+      } catch (err) {
+        // ignore, keep default message
+      }
+      throw new Error(message);
+    }
+
+    return response.blob();
   },
 
   createParticipant(eventId, payload) {

@@ -30,6 +30,7 @@ from app.services.checkin_service import (
     perform_checkin,
 )
 from app.services.email_service import send_registration_email
+from app.services.report_service import generate_paid_participants_report
 
 router = APIRouter(prefix="/participants", tags=["participants"])
 
@@ -197,6 +198,37 @@ def list_participants(
         .filter(Participant.event_id == current_admin.event_id)
         .order_by(Participant.created_at.desc())
         .all()
+    )
+
+
+@router.get("/report/pdf")
+def download_paid_participants_report(
+    db: Session = Depends(get_db),
+    current_admin: AdminUser = Depends(get_current_user),
+) -> Response:
+    event = db.get(Event, current_admin.event_id)
+    if event is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Evento nao encontrado"
+        )
+
+    paid_participants = (
+        db.query(Participant)
+        .filter(
+            Participant.event_id == current_admin.event_id,
+            Participant.payment_status == PaymentStatus.PAID,
+        )
+        .order_by(Participant.name.asc())
+        .all()
+    )
+
+    pdf_bytes = generate_paid_participants_report(event, paid_participants)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="participantes-pagos-evento-{event.id}.pdf"'
+        },
     )
 
 

@@ -7,7 +7,8 @@
   const form = document.getElementById("settings-form");
   const submitBtn = document.getElementById("settings-submit-btn");
   const bannerPreview = document.getElementById("banner-preview");
-  const bannerInput = document.getElementById("s-banner");
+  const bannerFileInput = document.getElementById("s-banner-file");
+  const bannerUploadBtn = document.getElementById("s-banner-upload-btn");
 
   function updateBannerPreview(url) {
     if (url) {
@@ -19,7 +20,28 @@
     }
   }
 
-  bannerInput.addEventListener("input", () => updateBannerPreview(bannerInput.value.trim()));
+  bannerUploadBtn.addEventListener("click", () => bannerFileInput.click());
+
+  bannerFileInput.addEventListener("change", async () => {
+    const file = bannerFileInput.files[0];
+    if (!file) return;
+
+    const originalLabel = bannerUploadBtn.innerHTML;
+    bannerUploadBtn.disabled = true;
+    bannerUploadBtn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
+
+    try {
+      const updatedEvent = await Api.uploadEventBanner(claims.event_id, file);
+      updateBannerPreview(updatedEvent.banner_url);
+      showToast("Imagem do evento atualizada.", "success");
+    } catch (err) {
+      showToast(errorMessage(err), "error");
+    } finally {
+      bannerUploadBtn.disabled = false;
+      bannerUploadBtn.innerHTML = originalLabel;
+      bannerFileInput.value = "";
+    }
+  });
 
   async function loadEvent() {
     try {
@@ -29,7 +51,6 @@
       document.getElementById("s-date").value = event.date || "";
       document.getElementById("s-time").value = (event.time || "").slice(0, 5);
       document.getElementById("s-location").value = event.location || "";
-      document.getElementById("s-banner").value = event.banner_url || "";
       document.getElementById("s-capacity").value = event.max_capacity || "";
       document.getElementById("s-price").value = event.ticket_price || "";
       document.getElementById("s-pix-key").value = event.pix_key || "";
@@ -78,7 +99,6 @@
       date: document.getElementById("s-date").value,
       time,
       location: document.getElementById("s-location").value.trim(),
-      banner_url: document.getElementById("s-banner").value.trim() || null,
       max_capacity: parseInt(document.getElementById("s-capacity").value, 10),
       ticket_price: document.getElementById("s-price").value,
       pix_key: document.getElementById("s-pix-key").value.trim() || null,

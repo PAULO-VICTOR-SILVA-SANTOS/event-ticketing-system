@@ -296,6 +296,29 @@
     URL.revokeObjectURL(url);
   });
 
+  document.getElementById("report-pdf-btn").addEventListener("click", async (evt) => {
+    const btn = evt.currentTarget;
+    const originalLabel = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader-2"></i> Gerando...';
+    try {
+      const blob = await Api.downloadPaidParticipantsReport();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "participantes-pagos.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast(errorMessage(err), "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+    }
+  });
+
   const addForm = document.getElementById("add-form");
   const addSubmitBtn = document.getElementById("add-submit-btn");
 

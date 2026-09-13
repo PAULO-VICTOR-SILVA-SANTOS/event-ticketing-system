@@ -88,9 +88,18 @@
               <input type="text" id="s-location" required />
             </div>
             <div class="field">
-              <label for="s-banner">URL do banner</label>
-              <input type="url" id="s-banner" placeholder="https://..." />
-              <div class="help-text">Cole o link de uma imagem ja hospedada (upload direto de arquivo ainda nao esta disponivel).</div>
+              <label for="s-banner-file">Imagem do evento</label>
+              <input
+                type="file"
+                id="s-banner-file"
+                accept="image/png, image/jpeg, image/webp"
+                capture="environment"
+                hidden
+              />
+              <button type="button" class="btn btn-outline" id="s-banner-upload-btn">
+                <i class="ti ti-upload"></i> Enviar imagem
+              </button>
+              <div class="help-text">JPEG, PNG ou WEBP, ate 5MB. Enviada assim que voce escolher o arquivo.</div>
             </div>
             <div class="field-row">
               <div class="field">

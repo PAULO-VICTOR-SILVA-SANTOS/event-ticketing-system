@@ -25,6 +25,11 @@ class Event(Base):
     time: Mapped[dt.time] = mapped_column(Time, nullable=False)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
     banner_url: Mapped[str | None] = mapped_column(String(500))
+    # Object path inside the Supabase Storage bucket for the currently-set
+    # banner_url (e.g. "events/3/banner-<uuid>.jpg") -- not shown to the
+    # frontend, only used server-side to delete the old file when a new
+    # banner is uploaded so the bucket doesn't accumulate orphaned images.
+    banner_storage_path: Mapped[str | None] = mapped_column(String(500))
     max_capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     ticket_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     pix_key: Mapped[str | None] = mapped_column(String(255))

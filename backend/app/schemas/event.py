@@ -29,7 +29,9 @@ class EventUpdate(BaseModel):
     date: dt.date | None = None
     time: dt.time | None = None
     location: str | None = None
-    banner_url: str | None = None
+    # banner_url intentionally absent: only settable via
+    # POST /events/{id}/banner (real upload), not by pasting an arbitrary
+    # URL through this generic update endpoint.
     max_capacity: int | None = None
     ticket_price: Decimal | None = None
     pix_key: str | None = None

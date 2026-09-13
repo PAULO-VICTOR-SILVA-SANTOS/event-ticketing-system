@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str | None = None
     RESEND_FROM_EMAIL: str = "Ingressos <ingressos@resend.dev>"
     PORTARIA_SECRET_KEY: str | None = None
+    # Supabase Storage (event banner uploads) -- a separate product from the
+    # Postgres DB, needs its own credentials even though both live in the
+    # same Supabase project. Upload endpoint fails loudly (503) if unset,
+    # rather than silently no-op'ing, since it's an explicit admin action.
+    SUPABASE_URL: str | None = None
+    SUPABASE_SERVICE_ROLE_KEY: str | None = None
+    SUPABASE_STORAGE_BUCKET: str = "event-banners"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     # Optional extra exact origin allowed for CORS (e.g. a future custom domain).
