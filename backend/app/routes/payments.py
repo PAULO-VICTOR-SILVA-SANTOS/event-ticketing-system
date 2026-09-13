@@ -82,6 +82,13 @@ def create_pix(payload: PixPaymentRequest, db: Session = Depends(get_db)) -> Pix
 def create_card(
     payload: CardPaymentRequest, db: Session = Depends(get_db)
 ) -> CardPaymentResponse:
+    # Cartao temporariamente desativado (pendente de validacao completa) --
+    # so Pix aceito. Remover este bloco para reativar cartao.
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Pagamento com cartao indisponivel no momento. Use Pix.",
+    )
+
     participant = _get_participant_for_event(payload.participant_id, payload.event_id, db)
     event = _get_event(payload.event_id, db)
 

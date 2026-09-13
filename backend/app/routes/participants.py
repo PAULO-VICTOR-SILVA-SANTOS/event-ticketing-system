@@ -11,7 +11,12 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.admin_user import AdminUser
 from app.models.event import Event
-from app.models.participant import PENDING_REGISTRATION_TTL, Participant, PaymentStatus
+from app.models.participant import (
+    PENDING_REGISTRATION_TTL,
+    Participant,
+    PaymentMethod,
+    PaymentStatus,
+)
 from app.schemas.checkin import CheckinRequest
 from app.schemas.participant import (
     DuplicateCheckResponse,
@@ -96,6 +101,14 @@ def check_duplicate(
 def create_participant(
     payload: ParticipantCreate, event_id: int, response: Response, db: Session = Depends(get_db)
 ) -> Participant:
+    # Cartao temporariamente desativado (pendente de validacao completa) --
+    # so Pix aceito. Remover este bloco para reativar cartao.
+    if payload.payment_method == PaymentMethod.CARD:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Pagamento com cartao indisponivel no momento. Use Pix.",
+        )
+
     # Locks the event row for the rest of this transaction so concurrent
     # registrations for the same event serialize instead of racing on the
     # capacity count below (classic check-then-act TOCTOU otherwise -- see
