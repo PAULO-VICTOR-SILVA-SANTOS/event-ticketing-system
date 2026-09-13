@@ -308,8 +308,9 @@ input:focus {
 /* Payment method toggle */
 
 .pay-toggle {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -323,6 +324,7 @@ input:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  flex: 0 1 260px;
   padding: 14px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -586,6 +588,37 @@ input:focus {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.contact-cta {
+  text-align: center;
+  margin: 14px auto 0;
+}
+
+.contact-cta__question {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+
+.contact-cta__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-2);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.contact-cta__link:hover {
+  color: #6ee7f5;
+  text-decoration: underline;
+}
+
+.contact-cta__link .ti {
+  font-size: 14px;
 }
 
 /* ============ PORTARIA ============ */
