@@ -1,130 +1,133 @@
-# Event Ticketing System
+# Sistema de Emissão de Ingressos
 
-Sistema de venda e gerenciamento de ingressos para eventos, com emissão de ingressos digitais, pagamento online e envio automático de confirmações por e-mail.
+Sistema completo para venda e gestão de ingressos de eventos, com pagamento via Pix e cartão de crédito, emissão de ingresso digital com QR Code e check-in na portaria em tempo real.
 
-Projeto desenvolvido como parte de portfólio, com foco em boas práticas de arquitetura de API, organização de código e integrações reais de mercado (pagamento e e-mail transacional).
+📄 **[Documentação da API](https://web-production-e71e8.up.railway.app/docs)**
 
-## ✨ Funcionalidades (planejadas)
+## Sobre o projeto
 
-- Cadastro e gerenciamento de eventos
-- Criação de lotes e tipos de ingresso (inteira, meia, VIP etc.)
-- Checkout e pagamento via [Mercado Pago](https://www.mercadopago.com.br/)
-- Emissão de ingresso digital (QR Code) por e-mail via [Resend](https://resend.com/)
-- Validação de ingressos na entrada do evento
-- Autenticação e autorização de usuários/organizadores
+Este sistema foi desenvolvido para um evento corporativo real — uma confraternização de uma equipe hospitalar — e está em produção, sendo utilizado de ponta a ponta: desde o cadastro e pagamento dos participantes até o check-in na entrada do evento. Não é um protótipo ou prova de conceito.
 
-## 🛠 Stack
+## Stack tecnológica
 
 **Backend**
-- [Python 3.13+](https://www.python.org/)
-- [FastAPI](https://fastapi.tiangolo.com/) — framework web assíncrono
-- [SQLAlchemy](https://www.sqlalchemy.org/) — ORM
-- [Alembic](https://alembic.sqlalchemy.org/) — migrações de banco de dados
-- [PostgreSQL](https://www.postgresql.org/) (via `psycopg2-binary`)
-- [Pydantic](https://docs.pydantic.dev/) / `pydantic-settings` — validação de dados e configuração
-- [Uvicorn](https://www.uvicorn.org/) — servidor ASGI
-
-**Integrações**
-- Mercado Pago — processamento de pagamentos
-- Resend — envio de e-mails transacionais
+- Python 3.13
+- FastAPI
+- SQLAlchemy
+- Alembic (migrações)
+- PostgreSQL (Supabase)
+- JWT (autenticação)
 
 **Frontend**
-- A definir (pasta `frontend/` reservada para a aplicação cliente)
+- HTML5, CSS3 e JavaScript puro (sem framework)
+- Painel administrativo completo + página pública de venda
 
-## 📁 Estrutura do projeto
+**Pagamentos**
+- Mercado Pago — Pix e Cartão de crédito via Checkout Bricks
+- Webhook para confirmação automática de pagamento
 
-```
-event-ticketing-system/
-├── backend/
-│   └── app/
-│       ├── main.py          # ponto de entrada da aplicação FastAPI
-│       ├── core/             # configurações, segurança, utilitários centrais
-│       ├── models/           # modelos ORM (SQLAlchemy)
-│       ├── routes/           # rotas/endpoints da API
-│       ├── schemas/          # schemas Pydantic (request/response)
-│       └── services/         # regras de negócio e integrações externas
-├── frontend/                 # aplicação cliente (a definir)
-├── docs/                     # documentação adicional do projeto
-├── requirements.txt
-├── .env.example
-└── README.md
-```
+**E-mail transacional**
+- Resend
 
-## 🚀 Como rodar localmente
+**Geração de ingresso**
+- qrcode + Pillow
+
+**Deploy**
+- Backend: Railway
+- Frontend: Vercel
+- Banco de dados: Supabase
+
+## Funcionalidades
+
+Tudo listado abaixo já está implementado e em produção:
+
+- Cadastro de participantes com detecção de duplicata (por e-mail ou WhatsApp)
+- Pagamento via Pix (QR Code dinâmico) e Cartão de crédito, processados pelo Mercado Pago
+- Confirmação automática de pagamento via webhook
+- Emissão de ingresso digital com QR Code, enviado automaticamente por e-mail (Resend)
+- Check-in por QR Code na portaria do evento
+- Painel administrativo completo:
+  - Dashboard com métricas do evento
+  - Gestão de participantes
+  - Gestão de despesas, com cálculo automático das taxas do Mercado Pago
+  - Configurações do evento
+- Tema claro/escuro no painel
+- Proteção contra concorrência: lock a nível de banco para evitar overselling de vagas e cadastros duplicados em acessos simultâneos
+- Expiração automática de cadastros pendentes não pagos (TTL de 20 minutos), liberando a vaga automaticamente
+
+## Instalação e execução local
 
 ### Pré-requisitos
 
-- Python 3.11+
-- PostgreSQL em execução (local ou remoto)
+- Python 3.13+
+- PostgreSQL (ou uma instância Supabase)
+- Conta no Mercado Pago (credenciais de teste ou produção)
+- Conta no Resend
 
-### 1. Clone o repositório
+### Passos
+
+1. Clone o repositório
 
 ```bash
-git clone https://github.com/<seu-usuario>/event-ticketing-system.git
+git clone https://github.com/PAULO-VICTOR-SILVA-SANTOS/event-ticketing-system.git
 cd event-ticketing-system
 ```
 
-### 2. Crie e ative um ambiente virtual
+2. Crie e ative um ambiente virtual
 
 ```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Linux/macOS
-source venv/bin/activate
+python3.13 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-### 3. Instale as dependências
+3. Instale as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure as variáveis de ambiente
+4. Configure as variáveis de ambiente
 
-Copie o arquivo de exemplo e preencha com os seus valores:
+Crie um arquivo `.env` na raiz do projeto com base no `.env.example`, incluindo:
 
-```bash
-cp .env.example .env
+```
+DATABASE_URL=
+SECRET_KEY=
+MP_ACCESS_TOKEN=
+MP_PUBLIC_KEY=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
 ```
 
-| Variável          | Descrição                                              |
-|-------------------|----------------------------------------------------------|
-| `DATABASE_URL`    | String de conexão do PostgreSQL                          |
-| `SECRET_KEY`      | Chave secreta usada para autenticação/assinatura          |
-| `MP_ACCESS_TOKEN` | Access Token da API do Mercado Pago                       |
-| `MP_PUBLIC_KEY`   | Public Key do Mercado Pago (usada no frontend)             |
-| `RESEND_API_KEY`  | API Key do Resend para envio de e-mails                   |
-
-### 5. Execute as migrações (quando disponíveis)
+5. Execute as migrações
 
 ```bash
 alembic upgrade head
 ```
 
-### 6. Suba a API
+6. Suba a aplicação
 
 ```bash
 uvicorn backend.app.main:app --reload
 ```
 
-A API estará disponível em `http://localhost:8000`, com documentação interativa em:
+A API estará disponível em `http://localhost:8000`, com documentação interativa em `/docs`.
 
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+7. Abra o frontend
 
-## 🗺 Roadmap
+Sirva os arquivos estáticos da pasta `frontend/` com um servidor local simples, por exemplo:
 
-- [ ] Modelagem inicial do banco de dados (eventos, ingressos, pedidos, usuários)
-- [ ] CRUD de eventos e tipos de ingresso
-- [ ] Fluxo de checkout com Mercado Pago
-- [ ] Geração de QR Code e envio de ingresso por e-mail
-- [ ] Autenticação de usuários/organizadores
-- [ ] Painel de validação de ingressos
-- [ ] Frontend da aplicação
+```bash
+npx serve frontend
+```
 
-## 📄 Licença
+Ou use a extensão Live Server do VS Code, apontando para `frontend/index.html`.
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+## Próximos passos
+
+- Lembrete automático 48h antes do evento (scheduler)
+- Testes automatizados com cobertura completa (pytest)
+
+## Licença
+
+Este código está disponível publicamente para fins de portfólio e avaliação técnica. Uso, cópia ou redistribuição para fins comerciais não são permitidos sem autorização prévia do autor.
