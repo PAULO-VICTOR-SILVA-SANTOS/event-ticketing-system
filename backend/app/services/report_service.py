@@ -6,7 +6,7 @@ from pathlib import Path
 
 import httpx
 from PIL import Image as PILImage
-from reportlab.graphics.shapes import Drawing, Polygon, String
+from reportlab.graphics.shapes import Circle, Drawing, Line, Polygon, String
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -29,10 +29,14 @@ from app.models.participant import Participant
 LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "pv-logo.png"
 
 ACCENT = colors.HexColor("#7b2fff")
+LOGO_PURPLE = colors.HexColor("#5a3fd6")
+PHONE_BLUE = colors.HexColor("#2f6fed")
 TEXT_DARK = colors.HexColor("#1a1a2e")
 TEXT_MUTED = colors.HexColor("#55556b")
 ROW_ALT = colors.HexColor("#f5f5fa")
 GRID_LINE = colors.HexColor("#cccccc")
+
+CONTACT_PHONE = "(83) 99915-9349"
 
 
 def generate_paid_participants_report(
@@ -147,6 +151,13 @@ def _fetch_banner_image(banner_url: str | None) -> Image | None:
             target_height = max_height
             target_width = target_height / aspect_ratio
 
+        # Shrink the whole block ~28% (uniform scale, so the full image
+        # still renders with no cropping) to leave more room for the
+        # participants table below.
+        BANNER_SCALE = 0.72
+        target_width *= BANNER_SCALE
+        target_height *= BANNER_SCALE
+
         return Image(io.BytesIO(data), width=target_width, height=target_height)
     except Exception:
         return None
@@ -159,19 +170,45 @@ def _build_header() -> Table:
         logo_flowable = _draw_pv_mark()
 
     text_style = ParagraphStyle(
-        "HeaderName", fontName="Helvetica-Bold", fontSize=13, leading=16, textColor=TEXT_DARK
+        "HeaderName", fontName="Helvetica-Bold", fontSize=13, leading=15, textColor=TEXT_DARK
     )
     sub_style = ParagraphStyle(
         "HeaderSub",
         fontName="Helvetica",
         fontSize=8,
-        leading=10,
-        spaceBefore=2,
+        leading=9,
+        spaceBefore=1,
         textColor=TEXT_MUTED,
     )
+    phone_style = ParagraphStyle(
+        "HeaderPhone",
+        fontName="Helvetica-Bold",
+        fontSize=8,
+        leading=9,
+        textColor=PHONE_BLUE,
+    )
+
+    phone_row = Table(
+        [[_draw_phone_icon(), Paragraph(CONTACT_PHONE, phone_style)]],
+        colWidths=[4 * mm, 40 * mm],
+    )
+    phone_row.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (0, 0), 2),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        )
+    )
+
     text_cell = [
         Paragraph("PV Technology", text_style),
         Paragraph("Sistema de ingressos", sub_style),
+        Spacer(1, 1.2 * mm),
+        phone_row,
     ]
 
     header_table = Table([[logo_flowable, text_cell]], colWidths=[26 * mm, 148 * mm])
@@ -186,6 +223,27 @@ def _build_header() -> Table:
         )
     )
     return header_table
+
+
+def _draw_phone_icon() -> Drawing:
+    """Minimal phone/call glyph built from plain vector shapes (no font or
+    image asset) -- a diagonal rounded-cap bar with a small knob at each
+    end, evoking a handset. Kept dependency-free on purpose: report
+    generation runs on the Linux Railway server, which won't have any of
+    this dev machine's Windows fonts installed.
+    """
+    size = 4 * mm
+    drawing = Drawing(size, size)
+    inset = size * 0.22
+    x0, y0 = inset, inset
+    x1, y1 = size - inset, size - inset
+    line = Line(x0, y0, x1, y1, strokeColor=PHONE_BLUE, strokeWidth=0.55 * mm)
+    line.strokeLineCap = 1  # round caps
+    drawing.add(line)
+    r = size * 0.14
+    drawing.add(Circle(x0, y0, r, fillColor=PHONE_BLUE, strokeColor=None))
+    drawing.add(Circle(x1, y1, r, fillColor=PHONE_BLUE, strokeColor=None))
+    return drawing
 
 
 def _draw_pv_mark() -> Drawing:
@@ -210,7 +268,7 @@ def _draw_pv_mark() -> Drawing:
     coords: list[float] = []
     for x_pct, y_pct in points_pct:
         coords.extend([x_pct * size, y_pct * size])
-    drawing.add(Polygon(coords, fillColor=ACCENT, strokeColor=None))
+    drawing.add(Polygon(coords, fillColor=LOGO_PURPLE, strokeColor=None))
     drawing.add(
         String(
             size / 2,
