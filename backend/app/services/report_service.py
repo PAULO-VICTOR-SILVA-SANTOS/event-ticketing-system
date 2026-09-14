@@ -6,7 +6,7 @@ from pathlib import Path
 
 import httpx
 from PIL import Image as PILImage
-from reportlab.graphics.shapes import Circle, Drawing, Line, Polygon, String
+from reportlab.graphics.shapes import Circle, Drawing, Line, Polygon, Rect, String
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -31,6 +31,7 @@ LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "pv-logo.png"
 ACCENT = colors.HexColor("#7b2fff")
 LOGO_PURPLE = colors.HexColor("#5a3fd6")
 PHONE_BLUE = colors.HexColor("#2f6fed")
+WHATSAPP_GREEN = colors.HexColor("#25D366")
 TEXT_DARK = colors.HexColor("#1a1a2e")
 TEXT_MUTED = colors.HexColor("#55556b")
 ROW_ALT = colors.HexColor("#f5f5fa")
@@ -189,7 +190,7 @@ def _build_header() -> Table:
     )
 
     phone_row = Table(
-        [[_draw_phone_icon(), Paragraph(CONTACT_PHONE, phone_style)]],
+        [[_draw_whatsapp_icon(), Paragraph(CONTACT_PHONE, phone_style)]],
         colWidths=[4 * mm, 40 * mm],
     )
     phone_row.setStyle(
@@ -225,24 +226,55 @@ def _build_header() -> Table:
     return header_table
 
 
-def _draw_phone_icon() -> Drawing:
-    """Minimal phone/call glyph built from plain vector shapes (no font or
-    image asset) -- a diagonal rounded-cap bar with a small knob at each
-    end, evoking a handset. Kept dependency-free on purpose: report
-    generation runs on the Linux Railway server, which won't have any of
-    this dev machine's Windows fonts installed.
+def _draw_whatsapp_icon() -> Drawing:
+    """Simplified WhatsApp glyph built from plain vector shapes (no font or
+    image asset) -- a rounded speech-bubble with a small tail, in the
+    brand's green, with a minimal white handset silhouette inside. Kept
+    dependency-free on purpose: report generation runs on the Linux
+    Railway server, which won't have any of this dev machine's Windows
+    fonts installed.
     """
     size = 4 * mm
     drawing = Drawing(size, size)
-    inset = size * 0.22
-    x0, y0 = inset, inset
-    x1, y1 = size - inset, size - inset
-    line = Line(x0, y0, x1, y1, strokeColor=PHONE_BLUE, strokeWidth=0.55 * mm)
-    line.strokeLineCap = 1  # round caps
-    drawing.add(line)
-    r = size * 0.14
-    drawing.add(Circle(x0, y0, r, fillColor=PHONE_BLUE, strokeColor=None))
-    drawing.add(Circle(x1, y1, r, fillColor=PHONE_BLUE, strokeColor=None))
+
+    bubble_w = size * 0.78
+    bubble_h = size * 0.62
+    bubble_x = (size - bubble_w) / 2
+    bubble_y = size * 0.30
+    corner = size * 0.16
+
+    # small pointed tail under the bubble's bottom-left
+    drawing.add(
+        Polygon(
+            [
+                bubble_x + bubble_w * 0.22, bubble_y,
+                bubble_x + bubble_w * 0.42, bubble_y,
+                bubble_x + bubble_w * 0.14, bubble_y - size * 0.14,
+            ],
+            fillColor=WHATSAPP_GREEN,
+            strokeColor=None,
+        )
+    )
+    drawing.add(
+        Rect(
+            bubble_x, bubble_y, bubble_w, bubble_h,
+            rx=corner, ry=corner,
+            fillColor=WHATSAPP_GREEN,
+            strokeColor=None,
+        )
+    )
+
+    # minimal white handset silhouette inside the bubble
+    cx, cy = bubble_x + bubble_w / 2, bubble_y + bubble_h / 2
+    reach = bubble_w * 0.30
+    x0, y0 = cx - reach, cy - reach * 0.6
+    x1, y1 = cx + reach, cy + reach * 0.6
+    handset_line = Line(x0, y0, x1, y1, strokeColor=colors.white, strokeWidth=size * 0.09)
+    handset_line.strokeLineCap = 1  # round caps
+    drawing.add(handset_line)
+    r = size * 0.05
+    drawing.add(Circle(x0, y0, r, fillColor=colors.white, strokeColor=None))
+    drawing.add(Circle(x1, y1, r, fillColor=colors.white, strokeColor=None))
     return drawing
 
 
