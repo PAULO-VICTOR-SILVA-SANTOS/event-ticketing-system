@@ -202,78 +202,23 @@ button {
   right: 20px;
 }
 
-@keyframes pvPulse {
-  0%,
-  100% {
-    filter: brightness(1) drop-shadow(0 0 4px rgba(0, 85, 255, 0.35));
-  }
-  50% {
-    filter: brightness(1.2) drop-shadow(0 0 10px rgba(120, 47, 255, 0.55));
-  }
-}
-
-.logo-mark-wrap {
-  position: relative;
+.pv-logo-img {
+  display: block;
   flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 10px;
 }
 
-.logo-ring,
-.logo-ring-2 {
-  position: absolute;
-  fill: none;
+/* The logo's own background is solid black -- invisible against this
+   panel's dark surface unless it gets a bright edge, so the glow only
+   applies in dark mode (light mode already has plenty of contrast). */
+:root[data-theme="dark"] .pv-logo-img {
+  box-shadow: 0 0 0 2px #ccff00, 0 0 14px 3px rgba(204, 255, 0, 0.5);
 }
 
-.logo-ring {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  animation: pvSpin 20s linear infinite;
-}
-
-.logo-ring-2 {
-  inset: 13%;
-  width: 74%;
-  height: 74%;
-  animation: pvSpin 13s linear infinite reverse;
-}
-
-@keyframes pvSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.logo-mark {
-  position: absolute;
-  inset: 20%;
-  width: 60%;
-  height: 60%;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0055ff, #7b2fff);
-  animation: pvPulse 3.5s ease-in-out infinite;
-}
-
-.logo-ring .orbit-dot {
-  filter: drop-shadow(0 0 3px rgba(123, 47, 255, 0.9));
-}
-
-.logo-mark span {
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.sidebar-brand .logo-mark-wrap {
-  width: 40px;
-  height: 40px;
-}
-
-.sidebar-brand .logo-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 0.62rem;
+.sidebar-brand .pv-logo-img {
+  width: 56px;
+  height: 56px;
 }
 
 .sidebar-brand .logo-text small {
@@ -996,35 +941,9 @@ tbody tr:last-child td {
   text-align: center;
 }
 
-.login-logo .logo-mark-wrap {
-  width: 68px;
-  height: 68px;
-}
-
-.login-logo .logo-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.05rem;
-}
-
-.login-logo h1 {
-  font-size: 1.25rem;
-}
-
-.brand-tagline {
-  display: block;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.62rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  background: linear-gradient(90deg, #0055ff, #7b2fff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 3px 0 6px;
+.login-logo .pv-logo-img {
+  width: 120px;
+  height: 120px;
 }
 
 .login-logo p {
