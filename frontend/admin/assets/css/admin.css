@@ -161,13 +161,19 @@ button {
 
 .sidebar-brand {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   padding: 8px 10px 24px;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 1.05rem;
+}
+
+.sidebar-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .brand-info {
@@ -221,7 +227,7 @@ button {
   height: 56px;
 }
 
-.sidebar-brand .logo-text small {
+.sidebar-tagline {
   display: block;
   font-family: var(--font-body);
   font-weight: 500;
@@ -944,6 +950,24 @@ tbody tr:last-child td {
 .login-logo .pv-logo-img {
   width: 120px;
   height: 120px;
+}
+
+.login-logo h1 {
+  font-size: 1.25rem;
+}
+
+.brand-tagline {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #0055ff, #7b2fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 3px 0 6px;
 }
 
 .login-logo p {

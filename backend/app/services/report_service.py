@@ -175,6 +175,9 @@ def _build_header() -> Table:
     else:
         logo_flowable = _draw_pv_mark()
 
+    name_style = ParagraphStyle(
+        "HeaderName", fontName="Helvetica-Bold", fontSize=13, leading=15, textColor=TEXT_DARK
+    )
     sub_style = ParagraphStyle(
         "HeaderSub",
         fontName="Helvetica",
@@ -213,6 +216,7 @@ def _build_header() -> Table:
     )
 
     text_cell = [
+        Paragraph("PV Technology", name_style),
         Paragraph("Sistema de ingressos", sub_style),
         Spacer(1, 1.2 * mm),
         phone_row,

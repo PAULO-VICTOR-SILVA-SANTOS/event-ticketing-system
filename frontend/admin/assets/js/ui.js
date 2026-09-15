@@ -19,13 +19,14 @@ function renderSidebar(activePage) {
   root.innerHTML = `
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-info">
-          <img class="pv-logo-img sidebar-logo" src="assets/img/pv-logo.png" alt="PV Technology" />
-          <div class="logo-text">
-            <small>PAINEL DO EVENTO</small>
+        <div class="sidebar-brand-row">
+          <div class="brand-info">
+            <img class="pv-logo-img sidebar-logo" src="assets/img/pv-logo.png" alt="PV Technology" />
+            <div class="logo-text">PV Technology</div>
           </div>
+          <button class="theme-toggle-btn" id="theme-toggle-btn" data-theme-toggle type="button"></button>
         </div>
-        <button class="theme-toggle-btn" id="theme-toggle-btn" data-theme-toggle type="button"></button>
+        <small class="sidebar-tagline">PAINEL DO EVENTO</small>
       </div>
       <nav class="sidebar-nav">${links}</nav>
       <div class="sidebar-footer">
