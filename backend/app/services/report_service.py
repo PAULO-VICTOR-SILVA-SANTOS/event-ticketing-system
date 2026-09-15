@@ -28,6 +28,11 @@ from app.models.participant import Participant
 # here to make the PDF match the brand exactly.
 LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "pv-logo.png"
 
+# Real official WhatsApp mark -- used as-is instead of the drawn
+# approximation below when present (same optional-asset pattern as
+# LOGO_PATH above).
+WHATSAPP_ICON_PATH = Path(__file__).resolve().parent.parent / "assets" / "whatsapp-icon.png"
+
 ACCENT = colors.HexColor("#7b2fff")
 LOGO_PURPLE = colors.HexColor("#5a3fd6")
 PHONE_BLUE = colors.HexColor("#2f6fed")
@@ -189,8 +194,13 @@ def _build_header() -> Table:
         textColor=PHONE_BLUE,
     )
 
+    if WHATSAPP_ICON_PATH.exists():
+        whatsapp_icon = Image(str(WHATSAPP_ICON_PATH), width=4 * mm, height=4 * mm)
+    else:
+        whatsapp_icon = _draw_whatsapp_icon()
+
     phone_row = Table(
-        [[_draw_whatsapp_icon(), Paragraph(CONTACT_PHONE, phone_style)]],
+        [[whatsapp_icon, Paragraph(CONTACT_PHONE, phone_style)]],
         colWidths=[4 * mm, 40 * mm],
     )
     phone_row.setStyle(
